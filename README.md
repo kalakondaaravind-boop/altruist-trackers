@@ -16,14 +16,10 @@ The app checks for updates on start (and under *Help → Check for updates…*).
 ## Releasing a new version
 
 1. Change the app (see layout below) and raise `"version"` in `package.json` (e.g. `1.0.1`).
-2. Commit and push, then tag and push the tag:
-   ```
-   git tag v1.0.1
-   git push origin v1.0.1
-   ```
-3. GitHub Actions (`Build Windows app`) builds the installer and publishes the Release. Installed apps pick it up automatically.
+2. Commit and push to `main`.
+3. GitHub Actions (`Build Windows app`) builds the installer and publishes it as Release `v1.0.1`. Installed apps pick it up automatically.
 
-You can also run the workflow manually from the *Actions* tab to get an installer without publishing a release.
+Pushes that do not change the version simply rebuild the same release.
 
 > Auto-update reads the Releases of this repository, so the repository needs to be **public** (it contains no data, only code). For a private repository the updater needs an access token and is not set up here.
 
