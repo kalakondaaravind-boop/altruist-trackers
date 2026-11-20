@@ -1,0 +1,72 @@
+{
+  "name": "altruist-trackers",
+  "productName": "Altruist Trackers",
+  "version": "1.0.0",
+  "description": "RFP, Commercials and AI Solutions trackers for Altruist BPM. All data stays on this computer.",
+  "author": "Altruist Technologies Private Limited",
+  "main": "main.js",
+  "private": true,
+  "scripts": {
+    "start": "npm run build:renderer && electron .",
+    "build:renderer": "node tools/build-renderer.js",
+    "test": "node tests/store.test.js",
+    "dist": "npm run build:renderer && electron-builder --win --publish never",
+    "release": "npm run build:renderer && electron-builder --win --publish always"
+  },
+  "dependencies": {
+    "electron-updater": "^6.3.9"
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.altruist.trackers",
+    "productName": "Altruist Trackers",
+    "copyright": "Altruist Technologies Private Limited",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "store.js",
+      "src/**/*",
+      "package.json",
+      "build/icon.ico"
+    ],
+    "asar": true,
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": false,
+      "deleteAppDataOnUninstall": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Altruist Trackers",
+      "runAfterFinish": true
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "releaseType": "release"
+      }
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kalakondaaravind-boop/altruist-trackers.git"
+  }
+}

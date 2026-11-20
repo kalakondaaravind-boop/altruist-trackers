@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Altruist Trackers</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'none'; object-src 'none'">
+<style>
+@font-face{font-family:'Inter';font-weight:400;font-style:normal;font-display:swap;src:url(fonts/inter-latin-400-normal.woff2) format('woff2')}@font-face{font-family:'Inter';font-weight:500;font-style:normal;font-display:swap;src:url(fonts/inter-latin-500-normal.woff2) format('woff2')}@font-face{font-family:'Inter';font-weight:600;font-style:normal;font-display:swap;src:url(fonts/inter-latin-600-normal.woff2) format('woff2')}@font-face{font-family:'Inter';font-weight:700;font-style:normal;font-display:swap;src:url(fonts/inter-latin-700-normal.woff2) format('woff2')}@font-face{font-family:'Inter';font-weight:800;font-style:normal;font-display:swap;src:url(fonts/inter-latin-800-normal.woff2) format('woff2')}
+/* Layout: sticky-header register table under KPI tiles; analytics and per-person pages share the same card language. */
+:root{--navy:#0d2145;--navy2:#17325f;--blue:#0b86c4;--bg:#eaf2fb;--card:#fff;--line:#d5e3f3;--ink:#10213f;--mute:#5f7090;--purple:#7c3aed;--green:#0f9d6b;--amber:#dd7a0b;--red:#dc2626;--f:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color-scheme:light}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f);font-size:13px;-webkit-font-smoothing:antialiased}
+body{background:linear-gradient(180deg,#eef5fd 0,#e8f1fb 100%) fixed;min-height:100%}
+button,input,select,textarea{font:inherit;color:inherit}
+svg.i{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#app{width:100%}
+.shell{display:flex;min-height:100vh;align-items:flex-start}
+.side{width:236px;flex:0 0 236px;position:sticky;top:0;height:100vh;overflow-y:auto;background:#0d2145;color:#cfe0f5;padding:18px 12px 24px}
+.brand{padding:4px 10px 16px;border-bottom:1px solid rgba(255,255,255,.12);margin-bottom:10px}.logo{background:#fff;border-radius:10px;padding:10px 12px;margin-bottom:8px}.logo img{display:block;height:30px;width:auto;max-width:100%}.sfoot{margin-top:22px;padding-top:12px;border-top:1px solid rgba(255,255,255,.12)}.ver{font-size:10.5px;color:#6f8fb8;padding:10px 10px 0}.si.rst{color:#ffb4b4;font-size:12px}.si.rst:hover{background:rgba(220,60,60,.25);color:#fff}.lks{font-size:11px;max-width:120px;height:26px;border:1px solid var(--line,#d5deec);border-radius:6px;color:#0b86c4;background:#fff}.lkrow{display:flex;gap:8px;margin-top:10px;align-items:center}.lkrow select{flex:1}.brand span{font-size:11px;color:#8fb3de;text-transform:uppercase;letter-spacing:.1em}
+.sg{margin-top:14px}.sh{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#8fb3de}.sh.on{color:#fff}.sh em{font-style:normal;background:rgba(255,255,255,.12);border-radius:10px;padding:1px 8px;font-size:10px;color:#fff}
+.si{display:flex;align-items:center;gap:6px;width:100%;text-align:left;background:none;border:0;color:#cfe0f5;font:inherit;font-size:13px;padding:8px 10px;border-radius:8px;cursor:pointer}.si:hover{background:rgba(255,255,255,.08);color:#fff}.si.on{background:#0b86c4;color:#fff;font-weight:600}.si.sub{padding:6px 10px 6px 26px;font-size:12.5px}.si.add{color:#8fb3de}
+#main{margin-top:14px}
+.content{flex:1;min-width:0;max-width:1500px;padding:18px 22px 40px}
+@media(max-width:900px){.shell{flex-direction:column}.side{position:static;width:100%;flex:none;height:auto}}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+h1{margin:0;font-size:22px;font-weight:800;letter-spacing:.2px;color:var(--navy);text-transform:uppercase}
+.sub{margin-top:3px;font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;color:var(--mute)}
+.acts{display:flex;gap:8px;flex-wrap:wrap;align-items:center;position:relative}
+.btn{display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 14px;border:1px solid var(--line);background:#fff;border-radius:7px;font-size:10.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--navy);cursor:pointer}
+.btn:hover{border-color:var(--blue)}
+.btn.pri{background:var(--blue);border-color:var(--blue);color:#fff;height:38px;padding:0 18px;font-size:11.5px}
+.btn.pri:hover{background:#0975ac}
+.btn.dng{color:var(--red)}
+:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
+.menu{position:absolute;right:0;top:42px;background:#fff;border:1px solid var(--line);border-radius:9px;box-shadow:0 10px 30px rgba(13,33,69,.15);min-width:250px;z-index:30;padding:6px}
+.menu button{display:block;width:100%;text-align:left;border:0;background:none;padding:9px 11px;border-radius:6px;cursor:pointer;font-size:12px}
+.menu button:hover{background:#eef5fd}.menu small{display:block;color:var(--mute);font-size:10.5px}
+.tabs{display:flex;gap:8px;margin:16px 0 14px;flex-wrap:wrap;align-items:center}
+.chip{display:inline-flex;align-items:center;gap:7px;height:28px;padding:0 12px;border:1px solid var(--line);background:#fff;border-radius:999px;font-size:10.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--navy);cursor:pointer}
+.chip.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.chip .d{width:7px;height:7px;border-radius:50%}
+.chip em{font-style:normal;font-weight:600;opacity:.75}
+.tabs .tab{height:34px;padding:0 18px;font-size:11px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-bottom:14px}
+.kpi{position:relative;background:#fff;border:1px solid var(--line);border-radius:12px;padding:13px 16px 12px 20px}
+.kpi:before{content:"";position:absolute;left:10px;top:14px;bottom:14px;width:4px;border-radius:3px;background:var(--c)}
+.k-blue{--c:var(--blue)}.k-purple{--c:var(--purple)}.k-green{--c:var(--green)}.k-amber{--c:var(--amber)}.k-red{--c:var(--red)}
+.kl{font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--mute)}
+.kv{font-size:20px;overflow-wrap:anywhere;font-weight:800;color:var(--navy);margin-top:3px;font-variant-numeric:tabular-nums}
+.ks{font-size:10px;letter-spacing:.3px;text-transform:uppercase;color:#8191ad;margin-top:2px}
+.bar{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.search{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:8px;height:36px;padding:0 12px;min-width:280px;color:var(--mute)}
+.search input{border:0;outline:0;background:none;flex:1;font-size:12px}
+.tcard{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.tscroll{overflow:auto;max-height:64vh}
+table{border-collapse:separate;border-spacing:0;width:max-content;min-width:100%}
+th{position:sticky;top:0;z-index:3;background:var(--navy);color:#fff;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;text-align:left;padding:0 10px;height:40px;white-space:nowrap;border-right:1px solid #1f3a6b}
+th[data-act=sort]{cursor:pointer}
+td{height:32px;padding:0;border-bottom:1px solid #e6eef8;border-right:1px solid #eef3fa;background:#fff;white-space:nowrap}
+tr:hover td{background:#f6faff}
+.s0,.s1,.s2{position:sticky;z-index:2}.s0{left:0}.s1{left:44px}.s2{left:84px;box-shadow:2px 0 0 #cfdcee}
+th.s0,th.s1,th.s2{z-index:4}
+td.rn{color:var(--mute);text-align:center;font-size:11px}
+.ob{border:0;background:none;cursor:pointer;color:var(--mute);width:100%;height:30px}.ob:hover{color:var(--blue)}
+.cell{width:100%;height:31px;border:0;background:transparent;padding:0 10px;outline:0;font-size:12px;text-transform:none}
+.cell:focus{box-shadow:inset 0 0 0 2px var(--blue);background:#fff}
+td .cell.num,td.r .cell{text-align:right}
+td.cl .cell{font-weight:700;text-transform:uppercase;font-size:11.5px;letter-spacing:.2px}
+.pillsel{appearance:none;-webkit-appearance:none;border:0;border-radius:5px;margin:4px 8px;width:calc(100% - 16px);height:24px;padding:0 8px;font-size:10px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;cursor:pointer}
+.g-early{background:#e6edf7;color:#41567a}.g-mid{background:#dbeefb;color:#0b6fa8}.g-late{background:#ede4ff;color:#6d28d9}.g-stall{background:#fdebd3;color:#b45f06}.g-won{background:#d6f3e7;color:#0a7a53}.g-lost{background:#fde0e0;color:#b91c1c}
+.t-rfp{background:#dbeefb;color:#0b6fa8}.t-bd{background:#ede4ff;color:#6d28d9}.t-farm{background:#d6f3e7;color:#0a7a53}
+.pill{display:inline-block;padding:3px 8px;border-radius:5px;font-size:10px;font-weight:700;letter-spacing:.3px;text-transform:uppercase}
+.own{background:#eef1f6;color:#41567a}
+.cv{display:block;padding:0 10px;line-height:31px;font-variant-numeric:tabular-nums;font-size:12px}
+.d-red{color:var(--red);font-weight:700}.d-amb{color:var(--amber);font-weight:700}.d-grn{color:var(--green);font-weight:600}
+.tfoot{display:flex;gap:22px;flex-wrap:wrap;padding:10px 16px;font-size:11px;color:var(--mute);border-top:1px solid var(--line);background:#f7fafe}
+.tfoot b{color:var(--navy)}
+.empty{padding:36px;text-align:center;color:var(--mute)}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
+.panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 18px;min-width:0}
+.panel h3{margin:0 0 12px;font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--navy)}
+.c12{grid-column:span 12}.c8{grid-column:span 8}.c7{grid-column:span 7}.c6{grid-column:span 6}.c5{grid-column:span 5}.c4{grid-column:span 4}
+@media(max-width:1000px){.c8,.c7,.c6,.c5,.c4{grid-column:span 12}}
+.fr{display:grid;grid-template-columns:170px 1fr 74px 140px;gap:10px;align-items:center;margin:5px 0;font-size:11.5px}
+.fr .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.fr .nm i{font-style:normal;color:var(--mute);margin-right:6px;font-variant-numeric:tabular-nums}
+.fr .tr{height:12px;background:#edf3fb;border-radius:6px;overflow:hidden}.fr .tr b{display:block;height:100%;border-radius:6px}
+.fr .v{text-align:right;font-variant-numeric:tabular-nums;color:var(--mute)}
+@media(max-width:700px){.fr{grid-template-columns:110px 1fr 40px 110px}}
+table.mini{width:100%}table.mini th{position:static;height:32px;background:#f1f6fc;color:var(--navy);border-right:0}
+table.mini td{height:34px;padding:0 10px;font-size:12px;font-variant-numeric:tabular-nums}
+table.mini td.r,table.mini th.r{text-align:right}
+table.mini tr.lk{cursor:pointer}
+.av{width:44px;height:44px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;font-weight:800;font-size:16px}
+.ph{display:flex;align-items:center;gap:14px;margin-bottom:14px}.ph h2{margin:0;font-size:20px;color:var(--navy)}
+.li{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid #edf3fa;font-size:12px;cursor:pointer}
+.li:last-child{border:0}.li small{display:block;color:var(--mute);margin-top:2px}
+.ov{position:fixed;inset:0;background:rgba(13,33,69,.42);z-index:50;display:flex;justify-content:flex-end}
+.ov.mid{justify-content:center;align-items:center;padding:16px}
+.drawer{width:min(760px,100%);height:100%;background:#f4f8fd;overflow:auto;padding:0 0 30px}
+.dh{position:sticky;top:0;background:var(--navy);color:#fff;padding:14px 20px;display:flex;justify-content:space-between;gap:12px;align-items:center;z-index:5}
+.dh h2{margin:0;font-size:15px;text-transform:uppercase;letter-spacing:.3px}.dh small{opacity:.75;font-size:11px}
+.dh .x{background:none;border:0;color:#fff;cursor:pointer;padding:6px}
+.ds{background:#fff;border:1px solid var(--line);border-radius:10px;margin:14px 18px 0;padding:14px 16px}
+.ds h4{margin:0 0 10px;font-size:10.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--blue)}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px}
+@media(max-width:600px){.fg{grid-template-columns:1fr}}
+.fld{display:flex;flex-direction:column;gap:4px;min-width:0}.fld.w{grid-column:1/-1}
+.fld span{font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--mute)}
+.fld input,.fld select,.fld textarea{border:1px solid var(--line);border-radius:6px;padding:7px 9px;background:#fff;font-size:12.5px;min-width:0;width:100%}
+.fld textarea{resize:vertical;min-height:38px;line-height:1.45}
+.ro{padding:7px 9px;background:#f1f6fc;border-radius:6px;font-weight:700;color:var(--navy)}
+.kw{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}.kw span{background:#dbeefb;color:#0b6fa8;font-size:10.5px;font-weight:600;padding:3px 8px;border-radius:999px}
+.rq{display:grid;grid-template-columns:160px 1fr;gap:8px 12px;align-items:start}
+.rq label{font-size:11.5px;font-weight:700;color:var(--navy);padding-top:8px}
+.rq textarea{border:1px solid var(--line);border-radius:6px;padding:7px 9px;width:100%;resize:vertical;min-height:36px;font-size:12.5px;line-height:1.45}
+@media(max-width:600px){.rq{grid-template-columns:1fr}.rq label{padding-top:0}}
+.note{font-size:11px;color:var(--mute);margin:0 0 10px}
+.modal{background:#fff;border-radius:12px;width:min(640px,100%);max-height:90vh;overflow:auto;padding:20px 22px}
+.modal h3{margin:0 0 4px;font-size:15px;color:var(--navy);text-transform:uppercase;letter-spacing:.3px}
+.modal p{color:var(--mute);margin:4px 0 12px;font-size:12px}
+.mf{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+.drop{border:2px dashed #b9cfe8;border-radius:10px;padding:26px;text-align:center;background:#f6faff;color:var(--mute);cursor:pointer}
+.drop.hot{border-color:var(--blue);background:#eaf5fc}
+.cr{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid #edf3fa;gap:10px}
+.cr label{display:flex;align-items:center;gap:8px;cursor:pointer}
+#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:10px 16px;border-radius:8px;font-size:12px;z-index:80;max-width:90vw}
+.mods{margin-bottom:6px}.mods .mod{height:42px;padding:0 24px;font-size:12px;letter-spacing:.6px}
+.sv{font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;color:var(--mute)}
+@media(prefers-reduced-motion:no-preference){.drawer{animation:sl .18s ease-out}@keyframes sl{from{transform:translateX(30px);opacity:.6}}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="layer"></div>
+<div id="toast" hidden></div>
+<script src="vendor/exceljs.min.js"></script>
+<script src="vendor/xlsx.full.min.js"></script>
+<script src="shim.js"></script>
+<script>
+(function(){
+'use strict';
+let MODE='rfp';
+let MO='';const DECS=['Selected to apply','Under evaluation','Not applying'];const FMTN={text:'Text',number:'Number',currency:'Currency (₹)',percent:'Percentage',date:'Date',yesno:'Yes / No',list:'Dropdown list'};
+const $=(s,r=document)=>r.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const IC={up:'<path d="M12 16V4m0 0L7 9m5-5l5 5M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3"/>',dn:'<path d="M12 4v12m0 0l-5-5m5 5l5-5M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3"/>',col:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16M15 4v16"/>',plus:'<path d="M12 5v14M5 12h14"/>',search:'<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>',open:'<path d="M15 3h6v6M10 14L21 3M19 14v5a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h5"/>',x:'<path d="M6 6l12 12M18 6L6 18"/>',tr:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>'};
+const ic=n=>`<svg class="i" viewBox="0 0 24 24">${IC[n]}</svg>`;
+const STAGES=[[1,'Target / Lead Identified',2,'Prospect fits target profile'],[2,'Lead Sourced & Validated',4,'Contact and account information verified'],[3,'Initial Outreach',6,'First sales contact initiated'],[4,'Engaged / Responded',10,'Prospect has responded'],[5,'Qualified Lead',20,'Need, fit and potential established'],[6,'Discovery Completed',30,'Requirements and buying process understood'],[7,'Opportunity Confirmed',40,'Genuine commercial opportunity identified'],[8,'Solution / Demo Presented',50,'Proposed solution accepted for evaluation'],[9,'Proposal Submitted',60,'Commercial proposal submitted'],[10,'Proposal Under Review',65,'Customer evaluating proposal'],[11,'Negotiation / Commercial Discussion',75,'Pricing, scope and terms being negotiated'],[12,'No Response / Stalled',35,'Customer becomes unresponsive'],[13,'Final Approval / Procurement',85,'Internal approval, legal or procurement underway'],[14,'Verbal Confirmation / Contract Pending',95,'Customer has agreed; documentation pending'],[15,'Closed Won / Converted',100,'Contract/PO/order completed'],[16,'Lost',0,'Lost the prospect']];
+let TYPES=['RFP'],DEFT='RFP';
+const SRC=['State','Central','PSU / Public sector','Private','Aggregator','Other'];
+const REQ=[['client','Client'],['process','Process'],['capacity','Current Capacity'],['location','Location'],['hours','Operating Hours'],['languages','Languages'],['channels','Channels'],['scope','Scope'],['manpower','Manpower'],['span','Span Ratio'],['agent','Agent Profile'],['training','Training'],['sla','Key SLA'],['implementation','Implementation'],['contract','Contract'],['compliance','Compliance'],['transport','Transportation'],['byClient','Provided by client'],['bySupervisor','Provided by Supervisor']];
+const COLS_N=[{k:'client',l:'Client Name',w:230,t:'text'},{k:'process',l:'Process',w:200,t:'text'},{k:'location',l:'Location',w:140,t:'text'},{k:'solution',l:'Solution',w:200,t:'text'},{k:'rate',l:'Rate (₹)',w:120,t:'rate'},{k:'fte',l:'FTE Count',w:100,t:'fte'},{k:'revenue',l:'Monthly Revenue (₹)',w:180,t:'rev'},{k:'consultant',l:'Consultant (Y/N)',w:130,t:'yn'},{k:'prob',l:'Win Probability',w:120,t:'prob'},{k:'owner',l:'BD Person',w:130,t:'owner'},{k:'notes',l:'Remarks',w:260,t:'text'},{k:'stage',l:'Current Status',w:250,t:'stage'},{k:'type',l:'Type',w:130,t:'type'},{k:'rfpLink',l:'Linked RFP',w:120,t:'rlink'},{k:'nextAction',l:'Next Action',w:200,t:'text'},{k:'nextDate',l:'Next Action Date',w:150,t:'date',hide:1},{k:'weighted',l:'Weighted Revenue (₹)',w:170,t:'weighted',hide:1}];
+const COLS_R=[
+{k:'client',l:'Client / Issuing Org',w:250,t:'text'},{k:'type',l:'Type',w:130,t:'type',hide:1},{k:'refNo',l:'Bid / Ref No',w:150,t:'text'},{k:'category',l:'Category',w:140,t:'text'},{k:'owner',l:'BD Person',w:130,t:'owner'},
+{k:'value',l:'Value (₹)',w:170,t:'money'},{k:'closing',l:'Closing',w:140,t:'date'},{k:'daysLeft',l:'Days Left',w:90,t:'days'},{k:'stage',l:'Stage',w:250,t:'stage'},{k:'decision',l:'Bid Decision',w:170,t:'decision'},{k:'commLink',l:'Commercials',w:130,t:'clink'},{k:'prob',l:'Probability',w:110,t:'prob'},{k:'weighted',l:'Weighted (₹)',w:160,t:'weighted'},{k:'fit',l:'Fit Score',w:120,t:'fit'},
+{k:'vendor',l:'Current Vendor',w:170,t:'text'},{k:'vendorLoc',l:'Vendor Location',w:140,t:'text',hide:1},{k:'curRate',l:'Current Rate (₹)',w:130,t:'mk'},{k:'curScope',l:'Current Scope of Work',w:220,t:'text',hide:1},{k:'curFte',l:'Current FTE / Headcount',w:120,t:'fte2',hide:1},{k:'agentSal',l:'Current Agent Salary (₹)',w:150,t:'mk',hide:1},{k:'supportSal',l:'Current Support Salary (₹)',w:160,t:'mk',hide:1},{k:'expRate',l:'Rate Expected by Client (₹)',w:170,t:'mk'},{k:'incEnd',l:'Current Contract End',w:140,t:'date',hide:1},
+{k:'nextAction',l:'Next Action',w:220,t:'text'},{k:'notes',l:'Notes',w:240,t:'text'},
+{k:'portal',l:'Source Portal',w:170,t:'text',hide:1},{k:'sourceType',l:'Source Type',w:150,t:'sourceType',hide:1},{k:'published',l:'Published',w:140,t:'date',hide:1},{k:'nextDate',l:'Next Action Date',w:150,t:'date',hide:1}];
+const colsNow=()=>MODE==='rfp'?COLS_R:COLS_N;
+const SEED=()=>{const b=blank('RFP');Object.assign(b,{id:'seed-181',ts:1,client:'RajCOMP Info Services Ltd (RISL), Govt of Rajasthan',refNo:'RIS2627SLOB00066',category:'Contact Centre',owner:'Unassigned',stage:5,value:1900000000,closing:'2026-12-08',closingTime:'15:30',published:'2026-10-30',firstSeen:'31 Oct 2026, 03:30 pm IST',portal:'Rajasthan e-Proc (via aggregator)',sourceType:'State',fit:95,fitReason:'₹1,90,00,00,000 statewide CM helpline, set up and run. The biggest contact-centre opportunity in this scan, with 5+ weeks to prepare. A consortium with a licence/SI partner may be needed.',keywords:'CM helpline, 181, call centre, system integrator, licenses',scope:'Establish and operate the Rajasthan Sampark CM Helpline 181 call center, plus upgrade and maintain its licences.',link:'https://www.tenderdetail.com/Indian-Tenders/TenderNotice/58290841/b48d21a73dbf0accc944cb2745dc4aa2',rfpDoc:'https://risl.rajasthan.gov.in/uploads/tenders/f4d7ecd4-8fd0-4768-8bdc-dacb3dda2d06.pdf',rfpDocNote:'RISL RFP, 137 pages (read 02-Nov via browser)',nextAction:'Decide consortium / licence partner',notes:'Closing 08.12.2026 at 3.30 PM (RFP)',req:{client:'RajCOMP Info Services Ltd (RISL) for DoIT&C, Government of Rajasthan',process:'Rajasthan Sampark CM Helpline 181: information services and public grievance redressal for citizens, plus upgrade and maintenance of call centre licences',capacity:'Existing centre set up with minimum 250 seats, scalable to 400; new envisaged capacity 1,000 seats (RISL decides seats per scheme/location)',location:'Pan-Rajasthan; locations decided by RISL. Space provided free by GoR/DoIT&C/RISL',hours:'24x7. One seat = 12 effective login hours a day x days in month (e.g. 12 x 30 = 360 login hours)',languages:'Hindi and English',channels:'Voice (toll-free 181, inbound and outbound, free for citizens on all networks), email; CRM, CTI, recording, ASR, IVR, dialler',scope:'Set up physical (non-ICT) and IT infrastructure, ATS, and operate and maintain the 181 call centre; integrate department applications with the CRM; analytics dashboards; content development and SOPs',manpower:'Project managers, assistant project manager, team leads, content managers, trainers, quality auditors, network administrator, agents, technical helpdesk seats',span:'—',agent:'Agents: any graduate. Team leads: any graduate, English and Hindi, 1 year relevant experience. Technical helpdesk: B.Tech/BE/MCA/MSc IT/BCA/BSc',training:'SI runs continuous training: induction before taking calls, refresher training, policy/department training, sensitivity and soft skills; training manuals shared with RISL; training room in the facility',sla:'Uptime >99.7%; ASA: >90% calls answered within 25 s; SLA #3 target <5% (likely abandonment); call quality score >80%; AHT <270 s; CSAT via IVRS. Penalties as % of monthly bill',implementation:'Go-Live within 8 weeks of work order (site preparation, IT and non-IT infra, content and SOPs, UAT)',contract:'3 years from Go-Live, extendable year on year. Estimated procurement cost ₹1,90,00,00,000; payment quarterly for actual seats',compliance:'Avg annual IT/ITeS turnover ≥ ₹40,00,00,000 (last 3 FYs); positive net worth; call centre of ≥300 physical seats in a single project in last 3 years; 3 years\' grievance-redressal/call-centre operations; CMMI L3 or ISO 9001/27001; office in Jaipur; bid security 2% of estimated cost (0.5% for Rajasthan SSI)',transport:'Not mentioned in RFP',byClient:'Space free of cost; electricity free of cost (RISL)',bySupervisor:'SI provides furniture, air conditioning, networking, telephony, training room, seat for one DoIT&C/RISL officer, power backup (≥3 hours battery)'}});
+const l=blank('BD Prospect');Object.assign(l,{id:'seed-lux',ts:2,client:'Lux Pharmacies LLP',process:'Concierge Services',location:'Mumbai',rate:60000,fte:10,owner:'Sushant',stage:9,nextAction:'Follow up on commercials',notes:'Commercials shared; go-live TBD'});
+const c=blank('BD Prospect');Object.assign(c,{id:'seed-chd',ts:3,client:'Chandigarh University',process:'WhatsApp, Chat',location:'NA',owner:'Karishma',stage:4,notes:'Commercials received; FTE and rate to be confirmed'});
+const x=blank('RFP');Object.assign(x,{id:'seed-181c',ts:0,client:'RajCOMP Info Services Ltd (RISL)',process:'Rajasthan Sampark CM Helpline 181',location:'Pan-Rajasthan',solution:'Set up and operate call centre',fte:1000,owner:'Unassigned',stage:5,nextDate:'2026-12-08',nextAction:'Submit bid',notes:'RFP RIS2627SLOB00066, closes 08-Dec-2026. Rate to be priced; evaluation sits in the RFP Tracker.'});b.decision='Selected to apply';b.commId='seed-181c';x.rfpId='seed-181';return{rfp:[b],comm:[x,l,c]}};
+function blank(type){return{vendor:'',vendorLoc:'',curRate:null,curScope:'',curFte:null,agentSal:null,supportSal:null,expRate:null,incEnd:'',decision:'Under evaluation',commId:'',rfpId:'',process:'',location:'',solution:'',rate:null,fte:null,consultant:'',id:'r'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),ts:Date.now(),type:type||DEFT,client:'',refNo:'',category:'',owner:'Unassigned',stage:1,prob:null,value:null,closing:'',closingTime:'',published:'',firstSeen:'',portal:'',sourceType:'',fit:null,fitReason:'',keywords:'',scope:'',link:'',rfpDoc:'',rfpDocNote:'',nextAction:'',nextDate:'',notes:'',req:{},custom:{}}}
+const CST=['Received','Commercials Shared','Won','Lost','On Hold'];
+function blankC(){return{id:'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),ts:Date.now(),client:'',process:'',location:'',solution:'',rate:null,fte:null,consultant:'',prob:null,owner:'Unassigned',remarks:'',status:'Received'}}
+const SEEDC=()=>[Object.assign(blankC(),{id:'cseed-lux',ts:1,client:'Lux Pharmacies LLP',process:'Concierge Services',location:'Mumbai',rate:60000,fte:10,owner:'Sushant',status:'Commercials Shared',prob:6}),Object.assign(blankC(),{id:'cseed-chd',ts:2,client:'Chandigarh University',process:'WhatsApp, Chat',location:'NA',owner:'Karishma',status:'Received'})];
+const SD=SEED();const S={rfp:SD.rfp,comm:SD.comm,ai:[],commInit:false,people:['Sushant','Karishma'],ccols:{rfp:[],comm:[],ai:[]},hid:{ai:[],rfp:COLS_R.filter(c=>c.hide).map(c=>c.k),comm:COLS_N.filter(c=>c.hide).map(c=>c.k)}};
+Object.defineProperty(S,'records',{get(){return MODE==='rfp'?S.rfp:MODE==='ai'?S.ai:S.comm},set(v){if(MODE==='rfp')S.rfp=v;else if(MODE==='ai')S.ai=v;else S.comm=v}});
+Object.defineProperty(S,'customCols',{get(){return S.ccols[MODE]},set(v){S.ccols[MODE]=v}});
+Object.defineProperty(S,'hidden',{get(){return S.hid[MODE]},set(v){S.hid[MODE]=v}});
+const U={view:'pipeline',person:null,chip:'all',q:'',sort:null,dir:1,db:null,dl:null,remote:false,rendered:false};
+try{const h=JSON.parse(localStorage.getItem('rpt-hid')||'null');if(h&&h.rfp)S.hid=Object.assign(S.hid,h)}catch(e){}
+function setMode(m){MODE=m;TYPES=m==='rfp'?['RFP']:['RFP','BD Prospect','Farming'];DEFT=m==='rfp'?'RFP':'BD Prospect';MO=m==='rfp'?'':' · monthly';U.chip='all';U.q='';U.sort=null;U.dir=1;U.view='pipeline'}
+/* helpers */
+const stOf=r=>STAGES[(+r.stage||1)-1];
+const status=r=>r.stage==15?'Won':r.stage==16?'Lost':r.stage==12?'Stalled':'Open';
+const probOf=r=>r.stage==15?100:r.stage==16?0:r.type==='Farming'?Math.max(0,Math.min(100,+r.prob||0)):stOf(r)[2];
+const grp=n=>n<=4?'early':n<=8?'mid':n==12?'stall':n==15?'won':n==16?'lost':'late';
+const GC={early:'#8ea4c6',mid:'#0b86c4',late:'#7c3aed',stall:'#dd7a0b',won:'#0f9d6b',lost:'#dc2626'};
+const tc=t=>t==='RFP'?'rfp':t==='Farming'?'farm':'bd';
+const tr2=x=>(+x.toFixed(2)).toString();
+function fmt(v){if(v==null||v===''||isNaN(v))return'';v=+v;const a=Math.abs(v);return'₹'+Math.round(v).toLocaleString('en-IN')}
+function parseMoney(s){if(typeof s==='number')return s;s=String(s||'').replace(/[₹,\s]/g,'').toLowerCase();if(!s)return null;const m=s.match(/^([\d.]+)(cr|crore|crores|l|lac|lakh|lakhs|lacs|k)?$/);if(!m)return NaN;let n=parseFloat(m[1]),u=m[2];if(!u)return n;if(u[0]==='c')n*=1e7;else if(u==='k')n*=1e3;else n*=1e5;return n}
+const pct=x=>x==null?'–':Math.round(x*100)+'%';
+const today=()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),d.getDate())};
+const dueOf=r=>MODE==='rfp'?r.closing:r.nextDate;
+const val=r=>MODE==='rfp'?(r.value==null||r.value===''?null:+r.value):((r.rate!=null&&r.rate!==''&&r.fte!=null&&r.fte!=='')?+r.rate*+r.fte:null);
+function daysLeft(r){if(!dueOf(r)||status(r)==='Won'||status(r)==='Lost')return null;const d=new Date(dueOf(r)+'T00:00:00');return isNaN(d)?null:Math.round((d-today())/864e5)}
+const fitRate=n=>n==null||n===''?'':n>=80?'High':n>=60?'Medium':'Low';
+const dstr=iso=>{if(!iso)return'';const d=new Date(iso+'T00:00:00');return isNaN(d)?iso:d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}).replace(/ /g,'-')};
+function stats(list){const s={n:list.length,open:0,won:0,lost:0,stalled:0,pipe:0,wtd:0,wonVal:0,lostVal:0};list.forEach(r=>{const v=val(r)||0,st=status(r);if(st==='Won'){s.won++;s.wonVal+=v}else if(st==='Lost'){s.lost++;s.lostVal+=v}else{s.open++;s.pipe+=v;s.wtd+=v*probOf(r)/100;if(st==='Stalled')s.stalled++}});s.wr=(s.won+s.lost)?s.won/(s.won+s.lost):null;return s}
+function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,3200)}
+const stable=o=>JSON.stringify(o,(k,v)=>v&&typeof v==='object'&&!Array.isArray(v)?Object.keys(v).sort().reduce((a,x)=>(a[x]=v[x],a),{}):v);
+/* persistence */
+const dirty=new Set(),gone=new Set();let metaDirty=false,timer=null,busy=false;
+function touchC(id){if(!S.commInit){S.comm.forEach(c=>dirty.add(c.id));S.commInit=true;metaDirty=true}touch(id)}
+function setSv(t){const e=$('#sv');if(e)e.textContent=t}
+function touch(id){if(id){if(!S.commInit&&S.comm.some(c=>c.id===id)){S.comm.forEach(c=>dirty.add(c.id));S.commInit=true;metaDirty=true}dirty.add(id)}sched()}
+function sched(){setSv('Saving…');clearTimeout(timer);timer=setTimeout(flush,700)}
+async function flush(){if(busy){sched();return}busy=true;try{if(U.db){if(!U.remote){S.rfp.concat(S.comm).forEach(r=>dirty.add(r.id));metaDirty=true;U.remote=true;S.commInit=true}
+for(const id of [...dirty]){dirty.delete(id);const r=S.rfp.find(x=>x.id===id);if(r)await U.db.collection('records').doc(id).set(JSON.parse(JSON.stringify(r)));else{const c=S.comm.find(x=>x.id===id);if(c)await U.db.collection('commercials').doc(id).set(JSON.parse(JSON.stringify(c)));else{const a=S.ai.find(x=>x.id===id);if(a)await U.db.collection('ai').doc(id).set(JSON.parse(JSON.stringify(a)))}}}
+for(const g of [...gone]){gone.delete(g);const p=g.includes('/')?g.split('/'):['records',g];await U.db.collection(p[0]).doc(p[1]).delete()}
+if(metaDirty){metaDirty=false;await U.db.doc('config/meta').set({people:S.people,ccols:S.ccols,commInit:S.commInit,hid:S.hid})}}
+else{try{localStorage.setItem('rpt-data2',JSON.stringify({rfp:S.rfp,comm:S.comm,ai:S.ai,people:S.people,ccols:S.ccols}))}catch(e){}}
+setSv('All changes saved')}catch(e){setSv('Not saved');toast('Could not save. You may have view-only access.')}busy=false}
+function saveHidden(){try{localStorage.setItem('rpt-hid',JSON.stringify(S.hid))}catch(e){}metaDirty=true;sched()}
+window.__flushNow=async()=>{clearTimeout(timer);let n=0;do{await flush();await new Promise(r=>setTimeout(r,30))}while((dirty.size||gone.size||metaDirty||busy)&&n++<30)};
+async function initData(){
+try{U.dl=await claude.use('downloads')}catch(e){}
+try{U.db=await claude.use('db')}catch(e){}
+if(!U.db){render();return}
+try{if(window.desk){const i=await desk.info();window.__ver=i.version}}catch(e){}
+try{const d=await U.db.loadAll();
+if(d&&d.initialized){U.remote=true;S.commInit=true;const byTs=(a,b)=>(a.ts||0)-(b.ts||0);
+S.rfp=d.records.map(x=>Object.assign(blank(),x)).sort(byTs);
+S.comm=d.commercials.map(x=>Object.assign(blank('RFP'),x)).sort(byTs);
+S.ai=d.ai.map(x=>Object.assign(blankA(),x)).sort(byTs);
+const m=d.meta||{},cc=m.ccols||{};S.people=m.people||[];S.ccols={rfp:cc.rfp||[],comm:cc.comm||[],ai:cc.ai||[]};
+if(m.hid)S.hid=Object.assign(S.hid,m.hid)}}catch(e){toast('Could not read saved data')}
+render()}
+function softRender(){const a=document.activeElement;if(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName)&&(a.closest('#app')||a.closest('#layer'))){softRender.p=1;return}render()}
+document.addEventListener('focusout',()=>{if(softRender.p){softRender.p=0;setTimeout(()=>{const a=document.activeElement;if(!(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName)))render()},60)}});
+
+/* ---------- views ---------- */
+const NR=['refNo','portal','sourceType','published'];
+const CC=()=>S.customCols.map(c=>({k:'c:'+c.key,l:c.label,w:170,t:'cust',fmt:c.fmt||'text',opts:c.opts,custom:1}));
+const allCols=()=>MODE==='ai'?AICOLS.map(c=>({k:c[0],l:c[1],w:c[2]})).concat(CC()):colsNow().filter(c=>!(c.k==='type'&&TYPES.length===1)&&!(MODE!=='rfp'&&NR.includes(c.k))).map(c=>MODE!=='rfp'&&c.k==='closing'?Object.assign({},c,{l:'Expected Close'}):c).concat(S.customCols.map(c=>({k:'c:'+c.key,l:c.label,w:170,t:'cust',fmt:c.fmt||'text',opts:c.opts,custom:1})));
+const visCols=()=>allCols().filter(c=>!S.hidden.includes(c.k));
+const ownersAll=()=>S.people.concat(['Unassigned']);
+function filtered(){let l=S.records.slice();const c=U.chip;
+if(c==='Non-RFP')l=l.filter(r=>r.type!=='RFP');else if(TYPES.includes(c))l=l.filter(r=>r.type===c);else if(c.startsWith('dec:'))l=l.filter(r=>r.decision===c.slice(4));else if(c==='Won'||c==='Lost'||c==='Stalled')l=l.filter(r=>status(r)===c);
+const q=U.q.trim().toLowerCase();if(q)l=l.filter(r=>[r.client,r.refNo,r.category,r.owner,r.notes,r.nextAction,r.portal,r.process,r.location,r.solution].join(' ').toLowerCase().includes(q));
+if(U.sort){const k=U.sort,g=r=>k==='revenue'?(val(r)||0):k==='weighted'?(val(r)||0)*probOf(r):k==='daysLeft'?(daysLeft(r)==null?1e9:daysLeft(r)):k==='prob'?probOf(r):k==='value'||k==='fit'||k==='stage'||k==='rate'||k==='fte'?(+r[k]||0):String(k.startsWith('c:')?(r.custom||{})[k.slice(2)]:r[k]||'').toLowerCase();
+l.sort((a,b)=>{const x=g(a),y=g(b);return(x>y?1:x<y?-1:0)*U.dir})}return l}
+function kpiHTML(list){const s=stats(list),cn=t=>list.filter(r=>r.type===t).length,soon=list.filter(r=>{const d=daysLeft(r);return d!=null&&d>=0&&d<=14}).length;
+const t=[['Records',s.n,TYPES.map(t=>cn(t)+' '+t).join(' · '),'blue'],['Open pipeline'+MO,fmt(s.pipe)||'₹0',`${s.open} open records`,'purple'],['Weighted pipeline'+MO,fmt(s.wtd)||'₹0','Open value × probability','blue'],['Won value'+MO,fmt(s.wonVal)||'₹0',`${s.won} won`,'green'],['Win rate',pct(s.wr),`${s.won} won · ${s.lost} lost`,'amber'],[MODE==='rfp'?'Closing in 14 days':'Actions due in 14 days',soon,MODE==='rfp'?'Open records with a deadline':'Open records with a next action date','red']];
+return t.map(x=>`<div class="kpi k-${x[3]}"><div class="kl">${x[0]}</div><div class="kv">${x[1]}</div><div class="ks">${x[2]}</div></div>`).join('')}
+function chipsHTML(){const R=S.records,n=f=>R.filter(f).length;const tcol={RFP:'#0b86c4','BD Prospect':'#7c3aed',Farming:'#0f9d6b'};const c=[['all','All',R.length,'']].concat(MODE==='rfp'?DECS.map(d=>['dec:'+d,d,n(r=>r.decision===d),d==='Selected to apply'?'#0f9d6b':d==='Not applying'?'#dc2626':'#8ea4c6']):[]).concat(TYPES.length>1?[['RFP','RFP',n(r=>r.type==='RFP'),tcol.RFP],['Non-RFP','Non-RFP',n(r=>r.type!=='RFP'),'#5f7090']].concat(TYPES.filter(t=>t!=='RFP').map(t=>[t,t,n(r=>r.type===t),tcol[t]])):[]).concat([['Won','Won',n(r=>status(r)==='Won'),'#0f9d6b'],['Lost','Lost',n(r=>status(r)==='Lost'),'#dc2626'],['Stalled','Stalled',n(r=>status(r)==='Stalled'),'#dd7a0b']]);
+return c.map(x=>`<button class="chip${U.chip===x[0]?' on':''}" data-act="chip" data-v="${x[0]}">${x[3]?`<span class="d" style="background:${x[3]}"></span>`:''}${x[1]} <em>${x[2]}</em></button>`).join('')}
+function cellHTML(r,c){const id=r.id,k=c.k,a=`data-id="${id}" data-k="${k}"`;
+switch(c.t){
+case'cust':return custCell(r,c);
+case'decision':return`<select class="cell pillsel ${r.decision==='Selected to apply'?'g-won':r.decision==='Not applying'?'g-lost':'g-early'}" ${a}>${DECS.map(t=>`<option${t===r.decision?' selected':''}>${t}</option>`).join('')}</select>`;
+case'clink':return r.commId&&S.comm.some(c=>c.id===r.commId)?`<button class="ob" style="color:var(--blue);font-weight:700;font-size:11px" data-act="gocomm" data-id="${r.id}">Commercials ↗</button>`:lkSel(r,'c');
+case'rlink':return r.rfpId&&S.rfp.some(c=>c.id===r.rfpId)?`<button class="ob" style="color:var(--blue);font-weight:700;font-size:11px" data-act="gorfp" data-id="${r.id}">RFP ↗</button>`:lkSel(r,'r');
+case'text':return`<input class="cell" ${a} value="${esc(c.custom?(r.custom||{})[k.slice(2)]:r[k])}">`;
+case'type':return`<select class="cell pillsel t-${tc(r.type)}" ${a}>${TYPES.map(t=>`<option${t===r.type?' selected':''}>${t}</option>`).join('')}</select>`;
+case'sourceType':return`<select class="cell" ${a}><option value=""></option>${SRC.map(t=>`<option${t===r.sourceType?' selected':''}>${t}</option>`).join('')}</select>`;
+case'owner':return`<select class="cell" ${a}>${ownersAll().map(t=>`<option${t===r.owner?' selected':''}>${esc(t)}</option>`).join('')}</select>`;
+case'rate':return`<input class="cell num" ${a} data-money="1" placeholder="NA" value="${r.rate==null?'':fmt(r.rate)}">`;
+case'fte':return`<input class="cell num" type="number" min="0" ${a} placeholder="NA" value="${r.fte==null?'':r.fte}">`;
+case'rev':return`<span class="cv" style="text-align:right" data-cell="rev">${val(r)==null?'':fmt(val(r))}</span>`;
+case'yn':return`<select class="cell" ${a}><option value=""></option>${['Y','N'].map(t=>`<option${t===r.consultant?' selected':''}>${t}</option>`).join('')}</select>`;
+case'mk':return`<input class="cell num" ${a} data-money="1" placeholder="₹" value="${r[k]==null?'':fmt(r[k])}">`;
+case'fte2':return`<input class="cell num" type="number" min="0" ${a} placeholder="NA" value="${r[k]==null?'':r[k]}">`;
+case'money':return`<input class="cell num" ${a} data-money="1" placeholder="amount in ₹" value="${r.value==null?'':fmt(r.value)}">`;
+case'date':return`<input class="cell" type="date" ${a} value="${esc(r[k])}">`;
+case'stage':return`<select class="cell pillsel g-${grp(+r.stage)}" ${a}>${STAGES.map(s=>`<option value="${s[0]}"${s[0]==r.stage?' selected':''}>${s[0]} · ${s[1]}</option>`).join('')}</select>`;
+case'prob':return r.type==='Farming'&&r.stage!=15&&r.stage!=16?`<input class="cell num" type="number" min="0" max="100" ${a} title="Manual probability for Farming" value="${r.prob==null?'':r.prob}" placeholder="manual %">`:`<span class="cv" style="text-align:right" data-cell="prob">${probOf(r)}%</span>`;
+case'weighted':return`<span class="cv" style="text-align:right" data-cell="weighted">${status(r)==='Open'||status(r)==='Stalled'?fmt((val(r)||0)*probOf(r)/100)||'':''}</span>`;
+case'days':{const d=daysLeft(r);return`<span class="cv ${d==null?'':d<0?'d-red':d<=7?'d-red':d<=21?'d-amb':'d-grn'}" data-cell="days">${d==null?'':d<0?'Closed':d+'d'}</span>`}
+case'fit':return`<div style="display:flex;align-items:center"><input class="cell num" type="number" min="0" max="100" ${a} value="${r.fit==null?'':r.fit}" style="width:62px"><span class="pill ${fitRate(r.fit)==='High'?'g-won':fitRate(r.fit)==='Medium'?'g-stall':'g-early'}" data-cell="fit" style="${r.fit==null?'display:none':''}">${fitRate(r.fit)}</span></div>`}
+return''}
+function rowHTML(r,i){const cs=visCols();return`<tr data-id="${r.id}"><td class="rn s0" style="min-width:44px">${i+1}</td><td class="s1" style="min-width:40px"><button class="ob" data-act="open" data-id="${r.id}" title="Open record details" aria-label="Open record details">${ic('open')}</button></td>${cs.map((c,j)=>`<td class="${j===0?'s2 cl':''}${['money','prob','weighted','rate','rev','fte'].includes(c.t)?' r':''}" style="min-width:${c.w}px">${cellHTML(r,c)}</td>`).join('')}</tr>`}
+function tableHTML(){const l=filtered(),cs=visCols();
+const head=`<tr><th class="s0" style="min-width:44px">#</th><th class="s1" style="min-width:40px"></th>${cs.map((c,j)=>`<th class="${j===0?'s2':''}" data-act="sort" data-k="${c.k}" style="min-width:${c.w}px">${esc(c.l)}${U.sort===c.k?(U.dir>0?' ▲':' ▼'):''}</th>`).join('')}</tr>`;
+return`<table id="tbl"><thead>${head}</thead><tbody id="tb">${l.map(rowHTML).join('')}</tbody></table>${l.length?'':'<div class="empty">No records match. Use Add record or Bulk upload to get started.</div>'}`}
+function footHTML(){const l=filtered(),s=stats(l);return`<span>Showing <b>${l.length}</b> of ${S.records.length}</span><span>Open value <b>${fmt(s.pipe)||'₹0'}</b></span><span>Weighted <b>${fmt(s.wtd)||'₹0'}</b></span><span>Won <b>${fmt(s.wonVal)||'₹0'}</b></span><span>Win rate <b>${pct(s.wr)}</b></span>`}
+function pipelineView(){return`<div class="kpis" id="kpis">${kpiHTML(S.records)}</div><div class="bar"><div class="chips" id="chips">${chipsHTML()}</div><label class="search">${ic('search')}<input id="q" placeholder="Search client, ref no, owner…" value="${esc(U.q)}" aria-label="Search records"></label></div><div class="tcard"><div class="tscroll" id="tw">${tableHTML()}</div><div class="tfoot" id="tfoot">${footHTML()}</div></div>`}
+function funnel(list){const mx=Math.max(1,...STAGES.map(s=>list.filter(r=>r.stage==s[0]).length));return STAGES.map(s=>{const l=list.filter(r=>r.stage==s[0]),v=l.reduce((a,r)=>a+(val(r)||0),0);return`<div class="fr"><div class="nm"><i>${s[0]}</i>${s[1]}</div><div class="tr"><b style="width:${l.length/mx*100}%;background:${GC[grp(s[0])]}"></b></div><div class="v">${l.length} · ${s[2]}%</div><div class="v">${fmt(v)||'–'}</div></div>`}).join('')}
+function typeTable(list){return`<table class="mini"><thead><tr><th>Type</th><th class="r">Records</th><th class="r">Open</th><th class="r">Won</th><th class="r">Lost</th><th class="r">Win rate</th><th class="r">Pipeline</th><th class="r">Weighted</th></tr></thead><tbody>${TYPES.map(t=>{const s=stats(list.filter(r=>r.type===t));return`<tr><td><span class="pill t-${tc(t)}">${t}</span></td><td class="r">${s.n}</td><td class="r">${s.open}</td><td class="r">${s.won}</td><td class="r">${s.lost}</td><td class="r">${pct(s.wr)}</td><td class="r">${fmt(s.pipe)||'–'}</td><td class="r">${fmt(s.wtd)||'–'}</td></tr>`}).join('')}</tbody></table>`}
+function deadlines(list,days){return list.filter(r=>{const d=daysLeft(r);return d!=null&&d>=0&&d<=days}).sort((a,b)=>daysLeft(a)-daysLeft(b))}
+function liHTML(r,extra){const d=daysLeft(r);return`<div class="li" data-act="open" data-id="${r.id}"><div><b>${esc(r.client)||'Untitled'}</b><small>${esc(r.refNo||r.category||r.type)} · ${stOf(r)[1]}</small></div><div style="text-align:right">${extra||''}${d!=null?`<small class="${d<=7?'d-red':d<=21?'d-amb':'d-grn'}">${d}d left</small>`:''}</div></div>`}
+function leaderTable(){const rows=ownersAll().map(n=>({n,s:stats(S.records.filter(r=>r.owner===n))})).filter(x=>x.n!=='Unassigned'||x.s.n);
+return`<table class="mini"><thead><tr><th>BD person</th><th class="r">Records</th><th class="r">Open</th><th class="r">Won</th><th class="r">Lost</th><th class="r">Win rate</th><th class="r">Pipeline</th><th class="r">Weighted</th><th class="r">Won value</th></tr></thead><tbody>${rows.map(x=>`<tr class="lk" data-act="person" data-v="${esc(x.n)}"><td><b>${esc(x.n)}</b></td><td class="r">${x.s.n}</td><td class="r">${x.s.open}</td><td class="r">${x.s.won}</td><td class="r">${x.s.lost}</td><td class="r">${pct(x.s.wr)}</td><td class="r">${fmt(x.s.pipe)||'–'}</td><td class="r">${fmt(x.s.wtd)||'–'}</td><td class="r">${fmt(x.s.wonVal)||'–'}</td></tr>`).join('')}</tbody></table>`}
+function overviewView(){const R=S.records,dl=deadlines(R,60),top=R.filter(r=>['Open','Stalled'].includes(status(r))).sort((a,b)=>(val(b)||0)*probOf(b)-(val(a)||0)*probOf(a)).slice(0,5);
+return`<div class="kpis">${kpiHTML(R)}</div><div class="grid"><div class="panel c8"><h3>Pipeline by ${MODE==='rfp'?'stage · records, probability, value':'status · records, probability, monthly revenue'}</h3>${funnel(R)}</div><div class="panel c4"><h3>${MODE==='rfp'?'Upcoming deadlines · next 60 days':'Next actions due · next 60 days'}</h3>${dl.length?dl.map(r=>liHTML(r,fmt(val(r)))).join(''):'<div class="empty">No open deadlines in the next 60 days.</div>'}</div><div class="panel c7"><h3>Performance by record type</h3>${typeTable(R)}</div><div class="panel c5"><h3>Top open opportunities · weighted value</h3>${top.length?top.map(r=>liHTML(r,fmt((val(r)||0)*probOf(r)/100)+' weighted<br>')).join(''):'<div class="empty">No open opportunities.</div>'}</div><div class="panel c12"><h3>Team leaderboard · select a person for their page</h3>${leaderTable()}</div></div>`}
+function teamView(){return`<div class="grid"><div class="panel c12"><h3>Team performance</h3>${leaderTable()}</div></div>`}
+function personView(name){const list=S.records.filter(r=>r.owner===name),s=stats(list),t=stats(S.records);
+const tiles=[['Records',s.n,`${s.open} open · ${s.stalled} stalled`,'blue'],['Open pipeline'+MO,fmt(s.pipe)||'₹0','Total open value','purple'],['Weighted pipeline'+MO,fmt(s.wtd)||'₹0','Value × probability','blue'],['Won value'+MO,fmt(s.wonVal)||'₹0',`${s.won} won`,'green'],['Win rate',pct(s.wr),`Team ${pct(t.wr)} · ${s.won} won / ${s.lost} lost`,'amber'],['Avg open deal'+MO,s.open?fmt(s.pipe/s.open):'–','Open pipeline ÷ open records','red']];
+const dl=deadlines(list,60),act=list.filter(r=>r.nextAction&&['Open','Stalled'].includes(status(r)));
+return`<div class="ph"><div class="av">${esc(name.slice(0,1).toUpperCase())}</div><div style="flex:1"><h2>${esc(name)}</h2><div class="sub">BD owner · performance review</div></div><button class="btn" data-act="exportperson" data-v="${esc(name)}">${ic('dn')} Export report</button>${name!=='Unassigned'?`<button class="btn dng" data-act="rmperson" data-v="${esc(name)}">${ic('tr')} Remove</button>`:''}</div>
+<div class="kpis">${tiles.map(x=>`<div class="kpi k-${x[3]}"><div class="kl">${x[0]}</div><div class="kv">${x[1]}</div><div class="ks">${x[2]}</div></div>`).join('')}</div>
+<div class="grid"><div class="panel c7"><h3>Stage distribution</h3>${funnel(list)}</div><div class="panel c5"><h3>${MODE==='rfp'?'Closing soon · next 60 days':'Actions due · next 60 days'}</h3>${dl.length?dl.map(r=>liHTML(r,fmt(val(r)))).join(''):'<div class="empty">Nothing closing in the next 60 days.</div>'}<h3 style="margin-top:18px">Next actions</h3>${act.length?act.map(r=>`<div class="li" data-act="open" data-id="${r.id}"><div><b>${esc(r.client)}</b><small>${esc(r.nextAction)}</small></div><small>${dstr(r.nextDate)}</small></div>`).join(''):'<div class="empty">No next actions logged.</div>'}</div>
+<div class="panel c12"><h3>Performance by record type</h3>${typeTable(list)}</div>
+<div class="panel c12"><h3>All records</h3><table class="mini"><thead><tr><th>Client</th><th>Type</th><th>Stage</th><th class="r">Prob.</th><th class="r">Value</th><th>${MODE==='rfp'?'Closing':'Next action'}</th><th class="r">Days</th></tr></thead><tbody>${list.map(r=>{const d=daysLeft(r);return`<tr class="lk" data-act="open" data-id="${r.id}"><td><b>${esc(r.client)||'Untitled'}</b></td><td><span class="pill t-${tc(r.type)}">${r.type}</span></td><td><span class="pill g-${grp(+r.stage)}">${stOf(r)[1]}</span></td><td class="r">${probOf(r)}%</td><td class="r">${fmt(val(r))||'–'}</td><td>${dstr(dueOf(r))}</td><td class="r">${d==null?'':d}</td></tr>`}).join('')||'<tr><td colspan="7" class="empty">No records assigned.</td></tr>'}</tbody></table></div></div>`}
+function lkSel(r,t){const o=t==='c'?S.comm.filter(x=>!x.rfpId).map(x=>[x.id,(x.client||'(no client)')+(x.process?' – '+x.process:'')]):S.rfp.filter(x=>!x.commId).map(x=>[x.id,(x.client||'(no client)')+' '+(x.refNo||'')]);if(!o.length)return'<span class="cv" style="color:#9aa9c2">–</span>';return`<select class="lks" data-lk="${r.id}"><option value="">Link…</option>${o.map(x=>`<option value="${x[0]}">${esc(x[1])}</option>`).join('')}</select>`}
+function sideHTML(){const v=U.view,hasUn=S.records.some(r=>r.owner==='Unassigned');
+const mods=[['rfp','RFP evaluation',S.rfp.length,'RFP register'],['comm','Commercials tracker',S.comm.length,'Commercial register'],['ai','AI solutions',S.ai.length,'AI solutions register']];
+const item=(m,vw,label)=>`<button class="si${MODE===m&&U.view===vw?' on':''}" data-act="nav" data-m="${m}" data-v="${vw}">${label}</button>`;
+let h=`<div class="brand"><div class="logo"><img src="data:image/png;base64,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" alt="Altruist"></div><span>BPM · Trackers</span></div>`;
+mods.forEach(([m,name,n,reg])=>{h+=`<div class="sg"><div class="sh${MODE===m?' on':''}">${name}<em>${n}</em></div>`;
+if(m==='ai'){h+=item(m,'pipeline',reg)}
+else{h+=item(m,'pipeline',reg)+item(m,'overview','Executive overview')+item(m,'team','Team performance');
+if(MODE===m&&(v==='team'||v==='person')){h+=S.people.concat(hasUn?['Unassigned']:[]).map(p=>`<button class="si sub${v==='person'&&U.person===p?' on':''}" data-act="person" data-v="${esc(p)}">${esc(p)}</button>`).join('')+`<button class="si sub add" data-act="addperson">${ic('plus')} Add person</button>`}}
+h+=`</div>`});h+=`<div class="sfoot"><div class="sh">Data &amp; backup</div><button class="si" data-act="bkexport">Export backup</button><button class="si" data-act="bkimport">Import backup</button><button class="si" data-act="bkfolder">Open backup folder</button><button class="si" data-act="chkupd">Check for updates</button><button class="si rst" data-act="resetall">Delete all data &amp; start new</button><div class="ver">${window.__ver?'Version '+window.__ver+' · ':''}Data stored on this computer</div></div>`;return h}
+function render(){const v=U.view,app=$('#app');if(v==='person'&&!ownersAll().includes(U.person))U.person=S.people[0]||'Unassigned';
+const ttl=MODE==='rfp'?'RFP evaluation':(MODE==='ai'?'AI solutions':'Commercials tracker');
+app.innerHTML=`<div class="shell"><aside class="side">${sideHTML()}</aside><div class="content"><div class="top"><div><h1>${ttl}</h1><div class="sub">${MODE==='rfp'?'Evaluate each tender and mark the ones to apply for. RFPs marked Selected to apply move into the Commercials tracker automatically.':(MODE==='ai'?'AI solutions offered to clients, with owners, IT contacts, status and estimated monthly revenue.':'Commercials for RFP and non-RFP projects. Use the RFP / Non-RFP filter below.')} Click a cell to type; open a row for full details. <span class="sv" id="sv"></span></div></div>
+<div class="acts"><button class="btn" data-act="bulk">${ic('up')} Bulk upload</button><button class="btn" data-act="cols">${ic('col')} Columns</button><button class="btn" data-act="addcol">${ic('plus')} Add column</button><button class="btn" data-act="exmenu">${ic('dn')} Export (Excel) ▾</button><button class="btn pri" data-act="addrow">${ic('plus')} ${MODE==='rfp'?'Add record':'Add row'}</button><div class="menu" id="exm" hidden><button data-act="exall"><b>Executive report (.xlsx)</b><small>Summary, register, team performance, RFP details</small></button><button data-act="excsv"><b>Pipeline register (.csv)</b><small>Flat table for other tools</small></button><button data-act="tpl"><b>Bulk-upload template (.xlsx)</b><small>Fill in and upload with Bulk upload</small></button></div></div></div>
+<div id="main">${MODE==='ai'?aiView():v==='pipeline'?pipelineView():v==='overview'?overviewView():v==='team'?teamView():personView(U.person)}</div></div></div>`;
+if(!U.rendered){U.rendered=1}}
+
+function custInput(r,c,mode){const v=(r.custom||{})[c.k?c.k.slice(2):c.key],f=c.fmt||'text',key=c.k?c.k.slice(2):c.key,a=MODE==='ai'?`data-ai="1" data-id="${r.id}" data-k="c:${key}" data-cfmt="${f}"`:mode==='drawer'?`data-f="c:${key}" data-cfmt="${f}"`:`data-id="${r.id}" data-k="c:${key}" data-cfmt="${f}"`,cl=mode==='drawer'?'':'cell ';
+switch(f){
+case'number':return`<input class="${cl}num" type="number" step="any" ${a} value="${v==null?'':esc(v)}">`;
+case'percent':return`<input class="${cl}num" type="number" min="0" max="100" step="any" ${a} placeholder="0–100 %" value="${v==null?'':esc(v)}">`;
+case'currency':return`<input class="${cl}num" ${a} placeholder="amount in ₹" value="${v==null||v===''?'':fmt(v)}">`;
+case'date':return`<input class="${cl}" type="date" ${a} value="${esc(v)}">`;
+case'yesno':return`<select class="${cl}" ${a}><option value=""></option>${['Yes','No'].map(o=>`<option${o===v?' selected':''}>${o}</option>`).join('')}</select>`;
+case'list':return`<select class="${cl}" ${a}><option value=""></option>${(c.opts||[]).map(o=>`<option${o===v?' selected':''}>${esc(o)}</option>`).join('')}</select>`;
+default:return`<input class="${cl}" ${a} value="${esc(v)}">`}}
+function custCell(r,c){return custInput(r,c,'cell')}
+function custField(r,c){return`<label class="fld"><span>${esc(c.label)} · ${FMTN[c.fmt||'text']}</span>${custInput(r,c,'drawer')}</label>`}
+
+/* ---------- AI solutions tracker ---------- */
+const AIST=['Launched','Won','Warm','Cold','Lost'];
+const AIC={Launched:'g-late',Won:'g-won',Warm:'g-stall',Cold:'g-early',Lost:'g-lost'};
+const AICOL={Launched:'#7c3aed',Won:'#0f9d6b',Warm:'#dd7a0b',Cold:'#8ea4c6',Lost:'#dc2626'};
+const AICOLS=[['client','Client Name',230],['processOwner','Process Owner',170],['itSpoc','IT SPOC',170],['solutions','Solutions Offered',290],['status','Status',150],['rev','Estimated Monthly Revenue (₹)',210],['remarks','Remarks',320]];
+function blankA(){return{id:'a'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),ts:Date.now(),client:'',processOwner:'',itSpoc:'',solutions:'',status:'Warm',rev:null,remarks:'',custom:{}}}
+const aiN=s=>S.ai.filter(r=>r.status===s).length;
+const aiSum=s=>S.ai.filter(r=>r.status===s).reduce((a,r)=>a+(+r.rev||0),0);
+function aiFiltered(){let l=S.ai.slice();if(AIST.includes(U.chip))l=l.filter(r=>r.status===U.chip);const q=U.q.trim().toLowerCase();if(q)l=l.filter(r=>[r.client,r.processOwner,r.itSpoc,r.solutions,r.remarks].join(' ').toLowerCase().includes(q));return l}
+function aiKpiHTML(){const d=aiN('Launched')+aiN('Won')+aiN('Lost');const t=[['Clients',S.ai.length,`${aiN('Launched')} launched · ${aiN('Won')} won`,'blue'],['Launched revenue · monthly',fmt(aiSum('Launched'))||'₹0',`Annual ${fmt(aiSum('Launched')*12)||'₹0'}`,'purple'],['Won revenue · monthly',fmt(aiSum('Won'))||'₹0',`${aiN('Won')} won, not yet launched`,'green'],['Warm pipeline · monthly',fmt(aiSum('Warm'))||'₹0',`${aiN('Warm')} warm · ${aiN('Cold')} cold`,'amber'],['Conversion',d?pct((aiN('Launched')+aiN('Won'))/d):'–',`${aiN('Launched')+aiN('Won')} converted · ${aiN('Lost')} lost`,'red']];
+return t.map(x=>`<div class="kpi k-${x[3]}"><div class="kl">${x[0]}</div><div class="kv">${x[1]}</div><div class="ks">${x[2]}</div></div>`).join('')}
+function aiChipsHTML(){return[['all','All',S.ai.length,'']].concat(AIST.map(s=>[s,s,aiN(s),AICOL[s]])).map(x=>`<button class="chip${U.chip===x[0]?' on':''}" data-act="aichip" data-v="${x[0]}">${x[3]?`<span class="d" style="background:${x[3]}"></span>`:''}${x[1]} <em>${x[2]}</em></button>`).join('')}
+function aiFootHTML(){const l=aiFiltered(),sum=l.reduce((a,r)=>a+(+r.rev||0),0);return`<span>Showing <b>${l.length}</b> of ${S.ai.length}</span><span>Estimated monthly revenue (shown rows) <b>${fmt(sum)||'₹0'}</b></span><span>Launched <b>${fmt(aiSum('Launched'))||'₹0'}</b></span><span>Won <b>${fmt(aiSum('Won'))||'₹0'}</b></span><span>Warm <b>${fmt(aiSum('Warm'))||'₹0'}</b></span>`}
+function aiCell(r,k){if(k.startsWith('c:')){const c=S.customCols.find(x=>x.key===k.slice(2));return c?custCell(r,c):''}const a=`data-ai="1" data-id="${r.id}" data-k="${k}"`;
+if(k==='status')return`<select class="cell pillsel ${AIC[r.status]||'g-early'}" ${a}>${AIST.map(s=>`<option${s===r.status?' selected':''}>${s}</option>`).join('')}</select>`;
+if(k==='rev')return`<input class="cell num" ${a} data-money="1" placeholder="amount in ₹" value="${r.rev==null?'':fmt(r.rev)}">`;
+return`<input class="cell" ${a} value="${esc(r[k])}">`}
+function aiVisCols(){const h=S.hidden;return allCols().filter(c=>c.k==='client'||!h.includes(c.k)).map(c=>[c.k,c.l,c.w])}
+function aiTableHTML(){const l=aiFiltered(),VC=aiVisCols();return`<table id="aitbl"><thead><tr><th class="s0" style="min-width:44px">#</th><th class="s1" style="min-width:40px"></th>${VC.map((c,j)=>`<th class="${j===0?'s2':''}" style="min-width:${c[2]}px">${esc(c[1])}</th>`).join('')}</tr></thead><tbody id="aitb">${l.map((r,i)=>`<tr data-id="${r.id}"><td class="rn s0" style="min-width:44px">${i+1}</td><td class="s1" style="min-width:40px"><button class="ob" data-act="aiopen" data-id="${r.id}" title="Open row details" aria-label="Open row details">${ic('open')}</button></td>${VC.map((c,j)=>`<td class="${j===0?'s2 cl':''}${c[0]==='rev'?' r':''}" style="min-width:${c[2]}px">${aiCell(r,c[0])}</td>`).join('')}</tr>`).join('')}</tbody></table>${l.length?'':'<div class="empty">No rows yet. Use Add row or Bulk upload to start tracking AI solutions.</div>'}`}
+function aiView(){return`<div class="kpis" id="aik">${aiKpiHTML()}</div><div class="bar"><div class="chips" id="aichips">${aiChipsHTML()}</div><label class="search">${ic('search')}<input id="q" placeholder="Search client, owner, SPOC, solution…" value="${esc(U.q)}" aria-label="Search rows"></label></div><div class="tcard"><div class="tscroll" id="aitw">${aiTableHTML()}</div><div class="tfoot" id="aif">${aiFootHTML()}</div></div>`}
+function aiEdit(el,final){const r=S.ai.find(x=>x.id===el.dataset.id);if(!r)return;const k=el.dataset.k;
+if(k.startsWith('c:')){if(commitValue(r,k,el,final))touch(r.id);return}
+if(el.dataset.money){if(!final)return;const m=parseMoney(el.value);if(Number.isNaN(m)){toast('Enter an amount in rupees, e.g. 1,50,000');el.value=r.rev==null?'':fmt(r.rev);return}r.rev=m;el.value=m==null?'':fmt(m)}else r[k]=el.value;
+touch(r.id);if(k==='status'&&el.tagName==='SELECT')el.className=(el.closest('.drawer')?'':'cell pillsel ')+(el.closest('.drawer')?'':AIC[r.status]);
+if(el.closest('.drawer')){const t=document.querySelector(`#aitb [data-id="${r.id}"][data-k="${k}"]`);if(t&&t!==document.activeElement){t.value=k==='rev'?(r.rev==null?'':fmt(r.rev)):r[k];if(k==='status')t.className='cell pillsel '+AIC[r.status]}const dt=$('#dt');if(dt)dt.textContent=r.client||'New row'}
+const kp=$('#aik');if(kp){kp.innerHTML=aiKpiHTML();$('#aichips').innerHTML=aiChipsHTML();$('#aif').innerHTML=aiFootHTML()}}
+function openAIDrawer(id){const r=S.ai.find(x=>x.id===id);if(!r)return;U.open=id;const f=(k,l,w)=>`<label class="fld${w?' w':''}"><span>${l}</span><input data-ai="1" data-id="${id}" data-k="${k}" value="${esc(r[k])}"></label>`;
+L().innerHTML=`<div class="ov" data-act="ovbg"><div class="drawer" role="dialog" aria-modal="true"><div class="dh"><div><h2 id="dt">${esc(r.client)||'New row'}</h2><small>AI solution</small></div><button class="x" data-act="closeD" aria-label="Close">${ic('x')}</button></div>
+<div class="ds"><h4>Client and contacts</h4><div class="fg">${f('client','Client name',1)}${f('processOwner','Process owner')}${f('itSpoc','IT SPOC')}</div></div>
+<div class="ds"><h4>Solution and status</h4><div class="fg"><label class="fld w"><span>Solutions offered</span><textarea data-ai="1" data-id="${id}" data-k="solutions" rows="3">${esc(r.solutions)}</textarea></label><label class="fld"><span>Status</span><select data-ai="1" data-id="${id}" data-k="status">${AIST.map(s=>`<option${s===r.status?' selected':''}>${s}</option>`).join('')}</select></label><label class="fld"><span>Estimated monthly revenue (₹)</span><input data-ai="1" data-id="${id}" data-k="rev" data-money="1" value="${r.rev==null?'':fmt(r.rev)}"></label><label class="fld w"><span>Remarks</span><textarea data-ai="1" data-id="${id}" data-k="remarks" rows="3">${esc(r.remarks)}</textarea></label></div></div>
+${S.customCols.length?`<div class="ds"><h4>Custom fields</h4><div class="fg">${S.customCols.map(c=>custField(r,c)).join('')}</div></div>`:''}
+<div class="ds" style="display:flex;justify-content:space-between;gap:10px"><button class="btn dng" data-act="aidel" data-id="${id}">${ic('tr')} Delete row</button><button class="btn pri" data-act="closeD">Done</button></div></div></div>`}
+
+/* ---------- drawer, modals, edits ---------- */
+const L=()=>$('#layer');
+const rec=id=>S.rfp.find(r=>r.id===id)||S.comm.find(r=>r.id===id)||S.ai.find(r=>r.id===id);
+function closeLayer(){const wasDrawer=!!$('.drawer');L().innerHTML='';if(wasDrawer){const r=rec(U.open);U.open=null;if(r&&!r.client&&!r.refNo&&!r.notes&&!r.solutions&&!r.remarks){delRec(r.id)}render()}}
+function modal(html){L().innerHTML=`<div class="ov mid" data-act="ovbg"><div class="modal" role="dialog" aria-modal="true">${html}</div></div>`}
+function askType(msg,word){return new Promise(res=>{modal(`<h3>Delete all data?</h3><p>${msg}</p><p>Type <b>${word}</b> to confirm.</p><input id="delw" class="cell" style="border:1px solid #c5d2e8;border-radius:8px;width:100%;height:36px" autocomplete="off"><div class="mf"><button class="btn" id="n">Cancel</button><button class="btn dng" id="y" disabled style="opacity:.5">Delete everything</button></div>`);const i=$('#delw'),y=$('#y');i.focus();i.oninput=()=>{const ok=i.value.trim()===word;y.disabled=!ok;y.style.opacity=ok?1:.5};$('#n').onclick=()=>{L().innerHTML='';res(false)};y.onclick=()=>{L().innerHTML='';res(true)}})}
+function ask(msg,okLabel){return new Promise(res=>{modal(`<h3>Please confirm</h3><p>${msg}</p><div class="mf"><button class="btn" id="n">Cancel</button><button class="btn dng" id="y">${okLabel||'Confirm'}</button></div>`);$('#n').onclick=()=>{L().innerHTML='';res(false)};$('#y').onclick=()=>{L().innerHTML='';res(true)}})}
+function openDrawer(id){const r=rec(id);if(!r)return;U.open=id;
+const f=(k,l,type,w)=>`<label class="fld${w?' w':''}"><span>${l}</span><input data-f="${k}" type="${type||'text'}" value="${esc(r[k])}"></label>`;
+const ta=(k,l)=>`<label class="fld w"><span>${l}</span><textarea data-f="${k}" rows="2">${esc(r[k])}</textarea></label>`;
+const sel=(k,l,opts,blank)=>`<label class="fld"><span>${l}</span><select data-f="${k}">${blank?'<option value=""></option>':''}${opts.map(o=>`<option${o===r[k]?' selected':''}>${esc(o)}</option>`).join('')}</select></label>`;
+const kws=(r.keywords||'').split(',').map(x=>x.trim()).filter(Boolean);
+if(MODE!=='rfp'){L().innerHTML=`<div class="ov" data-act="ovbg"><div class="drawer" role="dialog" aria-modal="true"><div class="dh"><div><h2 id="dt">${esc(r.client)||'New row'}</h2><small id="dsub">${r.type} · ${stOf(r)[1]}</small></div><button class="x" data-act="closeD" aria-label="Close">${ic('x')}</button></div>
+<div class="ds"><h4>Commercials</h4><div class="fg">${f('client','Client name')}${sel('type','Type',TYPES)}${f('process','Process')}${f('location','Location')}${f('solution','Solution',null,1)}
+<label class="fld"><span>Rate (₹ per FTE per month)</span><input data-f="rate" data-money="1" placeholder="NA" value="${r.rate==null?'':fmt(r.rate)}"></label>
+<label class="fld"><span>FTE count</span><input data-f="fte" type="number" min="0" placeholder="NA" value="${r.fte==null?'':r.fte}"></label>
+<label class="fld"><span>Monthly revenue (rate × FTE)</span><div class="ro" id="rvo">${fmt(val(r))||'–'}</div></label>${sel('consultant','Consultant (Y/N)',['Y','N'],1)}</div></div>
+<div class="ds"><h4>Status and ownership</h4><div class="fg"><label class="fld"><span>Current status</span><select data-f="stage">${STAGES.map(s=>`<option value="${s[0]}"${s[0]==r.stage?' selected':''}>${s[0]} · ${s[1]} (${s[2]}%)</option>`).join('')}</select></label>
+<label class="fld"><span id="plab">${r.type==='Farming'?'Win probability % (manual)':'Win probability (from status)'}</span>${r.type==='Farming'?`<input data-f="prob" type="number" min="0" max="100" value="${r.prob==null?'':r.prob}">`:`<div class="ro" id="pro">${probOf(r)}%</div>`}</label>${sel('owner','BD person',ownersAll())}${f('nextAction','Next action')}${f('nextDate','Next action date','date')}${ta('notes','Remarks')}</div></div>
+${S.customCols.length?`<div class="ds"><h4>Custom fields</h4><div class="fg">${S.customCols.map(c=>custField(r,c)).join('')}</div></div>`:''}
+<div class="ds" style="display:flex;justify-content:space-between;gap:10px"><button class="btn dng" data-act="delrec" data-id="${r.id}">${ic('tr')} Delete row</button><button class="btn pri" data-act="closeD">Done</button></div></div></div>`;$('.dh').insertAdjacentHTML('afterend',linkStrip(r));return}
+L().innerHTML=`<div class="ov" data-act="ovbg"><div class="drawer" role="dialog" aria-modal="true"><div class="dh"><div><h2 id="dt">${esc(r.client)||'New record'}</h2><small id="dsub">${esc(r.refNo)} ${r.refNo?'·':''} ${r.type} · ${stOf(r)[1]}</small></div><button class="x" data-act="closeD" aria-label="Close">${ic('x')}</button></div>
+<div class="ds"><h4>Opportunity</h4><div class="fg">${sel('type','Type',TYPES)}${f('client','Issuing organisation / client')}${f('refNo','Bid / Ref no')}${f('category','Category')}${sel('owner','BD person',ownersAll())}
+<label class="fld"><span>Stage</span><select data-f="stage">${STAGES.map(s=>`<option value="${s[0]}"${s[0]==r.stage?' selected':''}>${s[0]} · ${s[1]} (${s[2]}%)</option>`).join('')}</select></label>
+<label class="fld"><span id="plab">${r.type==='Farming'?'Probability % (manual)':'Probability (from stage)'}</span>${r.type==='Farming'?`<input data-f="prob" type="number" min="0" max="100" value="${r.prob==null?'':r.prob}">`:`<div class="ro" id="pro">${probOf(r)}%</div>`}</label>
+<label class="fld"><span>Value (₹)</span><input data-f="value" data-money="1" value="${r.value==null?'':fmt(r.value)}"></label>
+<label class="fld"><span>Fit score (0–100)</span><input data-f="fit" type="number" min="0" max="100" value="${r.fit==null?'':r.fit}"></label>${f('nextAction','Next action')}${f('nextDate','Next action date','date')}</div></div>
+<div class="ds"><h4>Current vendor and commercials</h4><p class="note">The incumbent arrangement and what the client expects. Use this to price the bid.</p><div class="fg">${f('vendor','Current vendor')}${f('vendorLoc','Location of vendor')}<label class="fld"><span>Current rate (₹)</span><input data-f="curRate" data-money="1" value="${r.curRate==null?'':fmt(r.curRate)}"></label><label class="fld"><span>Rate expected by client (₹)</span><input data-f="expRate" data-money="1" value="${r.expRate==null?'':fmt(r.expRate)}"></label>${f('curFte','Current FTE / headcount','number')}${f('incEnd','Current contract end','date')}<label class="fld"><span>Current agent salary (₹ per month)</span><input data-f="agentSal" data-money="1" value="${r.agentSal==null?'':fmt(r.agentSal)}"></label><label class="fld"><span>Current support salary (₹ per month)</span><input data-f="supportSal" data-money="1" value="${r.supportSal==null?'':fmt(r.supportSal)}"></label>${ta('curScope','Current scope of work')}</div></div>
+<div class="ds"><h4>Source and dates</h4><div class="fg">${f('portal','Source portal')}${sel('sourceType','Source type',SRC,1)}${f('published','Published','date')}${f('closing','Closing date','date')}${f('closingTime','Closing time','time')}${f('firstSeen','First seen')}</div></div>
+<div class="ds"><h4>Fit and scope</h4><div class="fg">${ta('fitReason','Why it fits us')}<label class="fld w"><span>Matched keywords (comma separated)</span><input data-f="keywords" value="${esc(r.keywords)}"><div class="kw" id="kw">${kws.map(k=>`<span>${esc(k)}</span>`).join('')}</div></label>${ta('scope','Scope')}${f('link','Link (tender listing)','url',1)}${f('rfpDoc','RFP document link','url',1)}${f('rfpDocNote','RFP document note',null,1)}${ta('notes','Notes')}</div></div>
+<div class="ds"><h4>RFP requirements</h4><p class="note">Filled from the tender notice where it says so. A dash means the notice doesn't say; check the RFP document.</p><div class="rq">${REQ.map(q=>`<label for="rq-${q[0]}">${q[1]}</label><textarea id="rq-${q[0]}" data-rq="${q[0]}" rows="2">${esc((r.req||{})[q[0]])}</textarea>`).join('')}</div></div>
+${S.customCols.length?`<div class="ds"><h4>Custom fields</h4><div class="fg">${S.customCols.map(c=>custField(r,c)).join('')}</div></div>`:''}
+<div class="ds" style="display:flex;justify-content:space-between;gap:10px"><button class="btn dng" data-act="delrec" data-id="${r.id}">${ic('tr')} Delete record</button><button class="btn pri" data-act="closeD">Done</button></div></div></div>`;
+$('.dh').insertAdjacentHTML('afterend',linkStrip(r));
+L().querySelectorAll('textarea').forEach(t=>{t.style.height='auto';t.style.height=Math.min(240,t.scrollHeight+2)+'px'})}
+function linkStrip(r){let h;
+if(MODE==='rfp'){const c=r.commId&&S.comm.find(x=>x.id===r.commId);h=`<label class="fld w"><span>Bid decision</span><select data-f="decision">${DECS.map(d=>`<option${d===r.decision?' selected':''}>${d}</option>`).join('')}</select></label>${c?`<div style="margin-top:10px"><button class="btn" data-act="gocomm" data-id="${r.id}">Open linked commercials row ↗</button> <button class="btn" data-act="unlink" data-id="${r.id}">Unlink</button></div>`:`<p class="note" style="margin:8px 0 0">Choose Selected to apply to add a linked row to the Commercials tracker, or link an existing row below.</p><div class="lkrow"><select id="lk" data-lk="${r.id}"><option value="">Link to existing commercials row…</option>${S.comm.filter(x=>!x.rfpId).map(x=>`<option value="${x.id}">${esc(x.client||'(no client)')}${x.process?' – '+esc(x.process):''}</option>`).join('')}</select></div>`}`}
+else{const p=r.rfpId&&S.rfp.find(x=>x.id===r.rfpId);h=p?`<p class="note">Linked to RFP <b>${esc(p.client)}</b> ${esc(p.refNo)}</p><button class="btn" data-act="gorfp" data-id="${r.id}">Open RFP evaluation ↗</button> <button class="btn" data-act="unlink" data-id="${r.id}">Unlink</button>`:`<p class="note" style="margin:0 0 8px">Not linked to an RFP.</p><div class="lkrow"><select id="lk" data-lk="${r.id}"><option value="">Link to an RFP…</option>${S.rfp.filter(x=>!x.commId).map(x=>`<option value="${x.id}">${esc(x.client||'(no client)')} ${esc(x.refNo||'')}</option>`).join('')}</select></div>`}
+return`<div class="ds"><h4>${MODE==='rfp'?'Bid decision and link':'Link to RFP'}</h4>${h}</div>`}
+function delRec(id){if(S.ai.some(x=>x.id===id)){S.ai=S.ai.filter(x=>x.id!==id);gone.add('ai/'+id);sched();return}if(S.rfp.some(x=>x.id===id)){S.rfp=S.rfp.filter(x=>x.id!==id);gone.add(id);S.comm.forEach(c=>{if(c.rfpId===id){c.rfpId='';touch(c.id)}})}else{S.comm=S.comm.filter(x=>x.id!==id);gone.add('commercials/'+id);S.rfp.forEach(r=>{if(r.commId===id){r.commId='';if(r.decision==='Selected to apply')r.decision='Under evaluation';touch(r.id)}})}sched()}
+function refreshAfterLink(){const o=U.open;if(o&&$('.drawer'))openDrawerKeep(o);else U.open=null;render()}
+async function decisionChanged(r,old){
+if(r.decision==='Selected to apply'){let c=r.commId&&S.comm.find(x=>x.id===r.commId);if(!c){c=blank('RFP');Object.assign(c,{client:r.client,process:(r.req||{}).process||r.category||'',location:(r.req||{}).location||'',owner:r.owner,stage:r.stage,nextDate:r.closing||'',nextAction:'Prepare commercial bid',notes:`Linked to RFP ${r.refNo||''}. Rate and FTE to be priced.`,rfpId:r.id,ts:Date.now()});S.comm.push(c);r.commId=c.id;touch(c.id);toast('Linked row added to the Commercials tracker')}}
+else if(old==='Selected to apply'&&r.commId){const c=S.comm.find(x=>x.id===r.commId);if(c){const rm=await ask('This RFP is no longer selected to apply. Remove its linked row from the Commercials tracker?','Remove row');if(rm)delRec(c.id);else{c.rfpId='';touch(c.id);r.commId=''}}else r.commId=''}
+touch(r.id);refreshAfterLink()}
+/* generic commit */
+function setVal(r,k,v){if(k.startsWith('c:')){r.custom=r.custom||{};r.custom[k.slice(2)]=v}else r[k]=v}
+function commitValue(r,k,el,final){let v=el.value;
+if(k==='decision'){const old=r.decision;r.decision=v;setTimeout(()=>decisionChanged(r,old),0);return true}
+if(k.startsWith('c:')&&el.dataset.cfmt){const f=el.dataset.cfmt,ck=k.slice(2);r.custom=r.custom||{};
+if(f==='currency'){if(!final)return false;const m=parseMoney(v);if(Number.isNaN(m)){toast('Enter an amount in rupees, e.g. 1,50,000');el.value=fmt(r.custom[ck])||'';return false}r.custom[ck]=m;el.value=m==null?'':fmt(m);return true}
+if(f==='number'||f==='percent'){v=v===''?null:+v;if(f==='percent'&&v!=null)v=Math.max(0,Math.min(100,v))}
+r.custom[ck]=v;return true}
+if(el.dataset.money){if(!final)return false;const m=parseMoney(v);if(Number.isNaN(m)){toast('Enter an amount in rupees, e.g. 60,000');el.value=r[k]==null?'':fmt(r[k]);return false}r[k]=m;el.value=m==null?'':fmt(m);return true}
+if(k==='stage')v=+v;else if(k==='fte'||k==='curFte')v=v===''?null:Math.max(0,+v);else if(k==='fit'||k==='prob')v=v===''?null:Math.max(0,Math.min(100,+v));
+setVal(r,k,v);return true}
+function afterChange(r,k,fromDrawer){touch(r.id);
+if(MODE==='rfp'&&r.commId&&(k==='client'||k==='owner'||k==='closing')){const c=S.comm.find(x=>x.id===r.commId);if(c){if(k==='client')c.client=r.client;if(k==='owner')c.owner=r.owner;if(k==='closing')c.nextDate=r.closing;touch(c.id)}}
+if(U.view==='pipeline'){const tb=$('#tb');const tr=tb&&tb.querySelector(`tr[data-id="${r.id}"]`);
+if(tr){if(k==='type'||k==='stage'||k==='decision'||(fromDrawer&&k==='prob')||(fromDrawer&&k!=='client')&&false){tr.outerHTML=rowHTML(r,[...tb.children].indexOf(tr))}else refreshRow(tr,r,fromDrawer,k)}
+$('#kpis').innerHTML=kpiHTML(S.records);$('#chips').innerHTML=chipsHTML();$('#tfoot').innerHTML=footHTML()}
+if(fromDrawer){$('#dt').textContent=r.client||'New record';$('#dsub').textContent=MODE==='rfp'?`${r.refNo||''} ${r.refNo?'·':''} ${r.type} · ${stOf(r)[1]}`:`${r.type} · ${stOf(r)[1]}`;const po=$('#pro');if(po)po.textContent=probOf(r)+'%';const rv=$('#rvo');if(rv)rv.textContent=fmt(val(r))||'–';
+if(k==='type'){openDrawerKeep(r.id)}if(k==='keywords'){$('#kw').innerHTML=(r.keywords||'').split(',').map(x=>x.trim()).filter(Boolean).map(x=>`<span>${esc(x)}</span>`).join('')}}}
+function openDrawerKeep(id){const sc=$('.drawer').scrollTop;openDrawer(id);$('.drawer').scrollTop=sc}
+function refreshRow(tr,r,fromDrawer,k){const cs=visCols();const tds=[...tr.children].slice(2);
+if(fromDrawer){cs.forEach((c,j)=>{const td=tds[j];if(!td||td.contains(document.activeElement))return;td.innerHTML=cellHTML(r,c)})}
+else{['days','weighted','prob','fit','rev'].forEach(n=>{const e=tr.querySelector(`[data-cell="${n}"]`);if(!e)return;const c=cs.find(x=>x.t===(n==='days'?'days':n));if(!c)return;const tmp=document.createElement('div');tmp.innerHTML=cellHTML(r,c);const ne=tmp.querySelector(`[data-cell="${n}"]`);if(ne)e.replaceWith(ne)})}}
+/* events */
+document.addEventListener('input',e=>{const el=e.target;
+if(el.dataset.ai){if(el.tagName!=='SELECT'&&!el.dataset.money)aiEdit(el,false);return}
+if(el.id==='q'&&MODE==='ai'){U.q=el.value;$('#aitw').innerHTML=aiTableHTML();$('#aif').innerHTML=aiFootHTML();return}
+if(el.id==='q'){U.q=el.value;$('#tw').innerHTML=tableHTML();$('#tfoot').innerHTML=footHTML();return}
+if(el.dataset.k&&el.closest('#tb')){const r=rec(el.dataset.id);if(!r||el.tagName==='SELECT'||el.type==='date'||el.dataset.money)return;if(commitValue(r,el.dataset.k,el,false))afterChange(r,el.dataset.k,false)}
+else if(el.dataset.f&&el.closest('.drawer')){const r=rec(U.open);if(!r||el.tagName==='SELECT'||el.dataset.money||el.type==='date'||el.type==='time')return;if(commitValue(r,el.dataset.f,el,false))afterChange(r,el.dataset.f,true)}
+else if(el.dataset.rq){const r=rec(U.open);r.req=r.req||{};r.req[el.dataset.rq]=el.value;touch(r.id);el.style.height='auto';el.style.height=Math.min(240,el.scrollHeight+2)+'px'}
+else if(el.dataset.cu){const r=rec(U.open);r.custom=r.custom||{};r.custom[el.dataset.cu]=el.value;touch(r.id)}});
+document.addEventListener('change',e=>{const el=e.target;
+if(el.dataset.ai){aiEdit(el,true);return}
+if(el.dataset.k&&el.closest('#tb')){const r=rec(el.dataset.id);if(r&&commitValue(r,el.dataset.k,el,true))afterChange(r,el.dataset.k,false)}
+else if(el.dataset.f&&el.closest('.drawer')){const r=rec(U.open);if(r&&commitValue(r,el.dataset.f,el,true))afterChange(r,el.dataset.f,true)}
+else if(el.id==='cf'){const H={text:'Example entry: any free text.',number:'Example entry: 25 or 12.5',currency:'Example entry: 1,50,000 (amount in rupees)',percent:'Example entry: 40 (a value from 0 to 100)',date:'Example entry: pick a date',yesno:'Entry is a Yes / No dropdown.',list:'Entry is a dropdown of the options you list above.'};$('#cow').style.display=el.value==='list'?'flex':'none';$('#chint').textContent=H[el.value]}
+else if(el.id==='colchk'||el.dataset.colk){const k=el.dataset.colk;S.hidden=el.checked?S.hidden.filter(x=>x!==k):S.hidden.concat(k);saveHidden()}
+else if(el.dataset.lk!==undefined){if(el.value){const me=rec(el.dataset.lk),o=rec(el.value);if(me&&o){const r=S.rfp.includes(me)?me:o,c=r===me?o:me;r.commId=c.id;c.rfpId=r.id;if(r.decision!=='Selected to apply')r.decision='Selected to apply';touch(r.id);touch(c.id);toast('Linked');refreshAfterLink()}}}
+else if(el.id==='fileIn'&&el.files[0])handleFile(el.files[0])});
+document.addEventListener('click',async e=>{const b=e.target.closest('[data-act]');
+if(!e.target.closest('.acts'))$('#exm')&&($('#exm').hidden=true);if(!b)return;const a=b.dataset.act,v=b.dataset.v,id=b.dataset.id;
+if(a==='ovbg'){if(e.target===b){if($('.drawer'))closeLayer();else L().innerHTML=''}return}
+switch(a){
+case'tab':U.view=v;location.hash=MODE+'-'+v;render();break;
+case'nav':{const m=b.dataset.m;if(m!==MODE){L().innerHTML='';U.open=null;setMode(m)}U.view=v;location.hash=m+'-'+v;render();break}
+case'unlink':{const me=rec(id);if(!me)break;const isR=S.rfp.includes(me),o=isR?S.comm.find(x=>x.id===me.commId):S.rfp.find(x=>x.id===me.rfpId);if(isR)me.commId='';else me.rfpId='';if(o){if(isR)o.rfpId='';else o.commId=''}touch(me.id);o&&touch(o.id);toast('Unlinked');refreshAfterLink();break}
+case'bkexport':if(window.desk){const r=await desk.exportBackup();if(r&&r.ok)toast('Backup exported')}break;
+case'bkimport':if(window.desk)await desk.importBackup();break;
+case'bkfolder':if(window.desk)desk.openBackupFolder();break;
+case'chkupd':if(window.desk)desk.checkUpdates();break;
+case'resetall':{if(await askType('This permanently deletes ALL RFPs, Commercials rows, AI solutions, people and custom columns, and starts a blank tracker. Export to Excel first if you need a copy. This cannot be undone.','DELETE')){try{await window.__flushNow();if(window.desk)await desk.safetyBackup('before-delete-all')}catch(e){}S.rfp.forEach(r=>gone.add(r.id));S.comm.forEach(c=>gone.add('commercials/'+c.id));S.ai.forEach(a=>gone.add('ai/'+a.id));dirty.clear();S.rfp=[];S.comm=[];S.ai=[];S.people=[];S.ccols={rfp:[],comm:[],ai:[]};if(U.db){U.remote=true;S.commInit=true}metaDirty=true;try{localStorage.removeItem('rpt-data2')}catch(e){}L().innerHTML='';U.open=null;U.view='pipeline';location.hash=MODE+'-pipeline';sched();render();toast('All data deleted. Ready for a fresh start.')}break}
+case'mode':L().innerHTML='';U.open=null;setMode(v);location.hash=v+'-pipeline';render();break;
+case'gocomm':{const r=S.rfp.find(x=>x.id===id),c=r&&S.comm.find(x=>x.id===r.commId);if(c){L().innerHTML='';U.open=null;setMode('comm');location.hash='comm-pipeline';render();openDrawer(c.id)}break}
+case'gorfp':{const r=S.comm.find(x=>x.id===id),p=r&&S.rfp.find(x=>x.id===r.rfpId);if(p){L().innerHTML='';U.open=null;setMode('rfp');location.hash='rfp-pipeline';render();openDrawer(p.id)}break}
+case'chip':U.chip=v;$('#chips').innerHTML=chipsHTML();$('#tw').innerHTML=tableHTML();$('#tfoot').innerHTML=footHTML();break;
+case'sort':if(U.sort===v)U.dir=-U.dir;else{U.sort=v;U.dir=1}$('#tw').innerHTML=tableHTML();break;
+case'open':openDrawer(id);break;
+case'closeD':closeLayer();break;
+case'aichip':U.chip=v;$('#aichips').innerHTML=aiChipsHTML();$('#aitw').innerHTML=aiTableHTML();$('#aif').innerHTML=aiFootHTML();break;
+case'aiopen':openAIDrawer(id);break;
+case'aidel':if(await ask('Delete this row permanently? This cannot be undone.','Delete row')){delRec(id);U.open=null;L().innerHTML='';render();toast('Row deleted')}break;
+case'addrow':{if(MODE==='ai'){const a=blankA();S.ai.push(a);touch(a.id);$('#aitw').innerHTML=aiTableHTML();$('#aif').innerHTML=aiFootHTML();$('#aik').innerHTML=aiKpiHTML();$('#aichips').innerHTML=aiChipsHTML();openAIDrawer(a.id);break}const r=blank(TYPES.includes(U.chip)?U.chip:DEFT);if(S.people[0]&&U.view==='person'&&U.person)r.owner=U.person;S.records.push(r);touch(r.id);if(U.view==='pipeline'){const tb=$('#tb');if(tb)tb.insertAdjacentHTML('beforeend',rowHTML(r,tb.children.length))}openDrawer(r.id);break}
+case'delrec':if(await ask('Delete this record permanently? This cannot be undone.','Delete record')){delRec(id);U.open=null;L().innerHTML='';render();toast('Record deleted')}break;
+case'person':U.view='person';U.person=v;location.hash=MODE+'-person-'+encodeURIComponent(v).replace(/[^a-zA-Z0-9]/g,'');render();break;
+case'addperson':modal(`<h3>Add BD person</h3><p>Each person gets a performance page with win rate, pipeline and stage mix.</p><label class="fld"><span>Name</span><input id="pn" autofocus></label><div class="mf"><button class="btn" data-act="cancel">Cancel</button><button class="btn pri" data-act="savep">Add person</button></div>`);setTimeout(()=>$('#pn')&&$('#pn').focus(),30);break;
+case'savep':{const n=$('#pn').value.trim();if(!n)return;if(!S.people.some(p=>p.toLowerCase()===n.toLowerCase())&&n!=='Unassigned'){S.people.push(n);metaDirty=true;sched()}U.view='person';U.person=n;L().innerHTML='';render();break}
+case'cancel':L().innerHTML='';break;
+case'rmperson':if(await ask(`Remove ${esc(v)} from the team? Their records stay and move to Unassigned.`,'Remove person')){S.rfp.concat(S.comm).forEach(r=>{if(r.owner===v){r.owner='Unassigned';touch(r.id)}});S.people=S.people.filter(p=>p!==v);metaDirty=true;sched();U.view='team';render()}break;
+case'cols':modal(`<h3>Columns</h3><p>Choose which columns appear in the pipeline register.</p>${allCols().map(c=>`<div class="cr"><label><input type="checkbox" data-colk="${c.k}"${S.hidden.includes(c.k)?'':' checked'}> ${esc(c.l)}</label>${c.custom?`<button class="btn dng" data-act="delcol" data-v="${c.k.slice(2)}">Remove</button>`:''}</div>`).join('')}<div class="mf"><button class="btn pri" data-act="colsdone">Apply</button></div>`);break;
+case'colsdone':L().innerHTML='';render();break;
+case'delcol':if(await ask('Remove this custom column and its values?','Remove column')){S.customCols=S.customCols.filter(c=>c.key!==v);S.records.forEach(r=>{if(r.custom)delete r.custom[v];touch(r.id)});metaDirty=true;sched();L().innerHTML='';render()}break;
+case'addcol':modal(`<h3>Add column</h3><p>Adds a column to every row in this register and to each record's details. Choose the entry format so values are checked and shown consistently.</p><label class="fld"><span>Column name</span><input id="cn"></label><label class="fld" style="margin-top:10px"><span>Entry format</span><select id="cf">${Object.keys(FMTN).map(k=>`<option value="${k}">${FMTN[k]}</option>`).join('')}</select></label><label class="fld" id="cow" style="margin-top:10px;display:none"><span>Dropdown options (comma separated)</span><input id="co" placeholder="e.g. Hot, Warm, Cold"></label><p id="chint" style="margin-top:10px">Example entry: any free text.</p><div class="mf"><button class="btn" data-act="cancel">Cancel</button><button class="btn pri" data-act="savecol">Add column</button></div>`);setTimeout(()=>$('#cn')&&$('#cn').focus(),30);break;
+case'savecol':{const n=$('#cn').value.trim();if(!n)return;const f=$('#cf').value,col={key:'x'+Date.now().toString(36),label:n,fmt:f};if(f==='list'){col.opts=$('#co').value.split(',').map(s=>s.trim()).filter(Boolean);if(!col.opts.length){toast('Add at least one dropdown option');return}}S.customCols.push(col);metaDirty=true;sched();L().innerHTML='';render();break}
+case'exmenu':$('#exm').hidden=!$('#exm').hidden;break;
+case'exall':$('#exm').hidden=true;if(MODE==='ai')exportAI();else exportReport(S.records,null);break;
+case'excsv':$('#exm').hidden=true;if(MODE==='ai')exportAICSV();else exportCSV();break;
+case'tpl':$('#exm').hidden=true;if(MODE==='ai')aiTemplate();else downloadTemplate();break;
+case'exportperson':exportReport(S.records.filter(r=>r.owner===v),v);break;
+case'bulk':bulkModal();break;
+}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if($('.drawer'))closeLayer();else if(L().innerHTML)L().innerHTML=''}});
+function route(){const hh=location.hash.slice(1),m=hh.split('-')[0];let h=hh;if(m==='rfp'||m==='comm'||m==='ai'){if(m!==MODE)setMode(m);h=hh.slice(m.length+1)}if(['pipeline','overview','team'].includes(h))U.view=h;else if(h.startsWith('person-')){const k=h.slice(7);const p=ownersAll().find(n=>n.replace(/[^a-zA-Z0-9]/g,'')===k);if(p){U.view='person';U.person=p}}}
+window.addEventListener('hashchange',()=>{route();render()});
+
+/* ---------- exports ---------- */
+async function save(name,data){if(!U.dl){toast('Downloads are not available in this view');return}try{await U.dl.save({filename:name,data});toast('File ready: '+name)}catch(e){if(e&&e.code!=='declined')toast('Could not save the file')}}
+const INR='[>=10000000]"₹"##\\,##\\,##\\,##0;[>=100000]"₹"##\\,##\\,##0;"₹"#,##0';
+const C={navy:'FF0D2145',blue:'FF0B86C4',pale:'FFEAF2FB',line:'FFD5E3F3',ink:'FF10213F',mute:'FF5F7090',white:'FFFFFFFF'};
+const GF={early:['FFE6EDF7','FF41567A'],mid:['FFDBEEFB','FF0B6FA8'],late:['FFEDE4FF','FF6D28D9'],stall:['FFFDEBD3','FFB45F06'],won:['FFD6F3E7','FF0A7A53'],lost:['FFFDE0E0','FFB91C1C']};
+const fl=a=>({type:'pattern',pattern:'solid',fgColor:{argb:a}});
+const th={style:'thin',color:{argb:C.line}},bx={top:th,bottom:th,left:th,right:th};
+const fnt=(o)=>Object.assign({name:'Calibri',size:10,color:{argb:C.ink}},o||{});
+const isoD=s=>s?new Date(s+'T00:00:00Z'):null;
+const cr=v=>v==null||v===''?null:+v;
+function banner(ws,t1,t2,last){ws.mergeCells(1,1,1,last);ws.mergeCells(2,1,2,last);const a=ws.getCell(1,1),b=ws.getCell(2,1);a.value=t1;a.font=fnt({size:16,bold:true,color:{argb:C.white}});a.fill=fl(C.navy);a.alignment={vertical:'middle',indent:1};ws.getRow(1).height=34;b.value=t2;b.font=fnt({size:9.5,color:{argb:C.mute},italic:true});b.fill=fl(C.pale);b.alignment={vertical:'middle',indent:1};ws.getRow(2).height=20;for(let c=1;c<=last;c++){ws.getCell(1,c).fill=fl(C.navy);ws.getCell(2,c).fill=fl(C.pale)}}
+function section(ws,row,text,c1,c2){ws.mergeCells(row,c1,row,c2);const c=ws.getCell(row,c1);c.value=text;c.font=fnt({bold:true,size:10,color:{argb:C.white}});c.fill=fl(C.blue);c.alignment={vertical:'middle',indent:1};ws.getRow(row).height=20}
+function heads(ws,row,c1,arr,wrap){arr.forEach((h,i)=>{const c=ws.getCell(row,c1+i);c.value=h;c.font=fnt({bold:true,color:{argb:C.white},size:9.5});c.fill=fl(C.navy);c.border=bx;c.alignment={vertical:'middle',horizontal:i===0?'left':'center',wrapText:true}});ws.getRow(row).height=wrap?32:24}
+function cellS(c,o){o=o||{};c.font=fnt(o.font);c.border=bx;c.alignment={vertical:'top',wrapText:!!o.wrap,horizontal:o.h};if(o.nf)c.numFmt=o.nf;if(o.fill)c.fill=fl(o.fill)}
+async function buildReport(list,who){
+const wb=new ExcelJS.Workbook();wb.creator='Altruist BPM';wb.created=new Date();
+const sum=wb.addWorksheet('Executive Summary',{views:[{showGridLines:false}],properties:{tabColor:{argb:C.navy}}});
+const reg=wb.addWorksheet('Pipeline Register',{properties:{tabColor:{argb:C.blue}}});
+const tm=wb.addWorksheet('Team Performance',{views:[{showGridLines:false}],properties:{tabColor:{argb:'FF7C3AED'}}});
+const rf=wb.addWorksheet('RFP Details',{views:[{showGridLines:false}],properties:{tabColor:{argb:'FF0F9D6B'}}});
+const sr=wb.addWorksheet('Stage Reference',{views:[{showGridLines:false}],properties:{tabColor:{argb:'FF8EA4C6'}}});
+const when=new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'});
+const sub=`Scope: ${who||'All BD owners'}  ·  Prepared ${when}  ·  Amounts in Indian Rupees (₹)  ·  Confidential`;
+[sum,reg,tm,rf,sr].forEach(w=>{w.pageSetup={orientation:'landscape',paperSize:9,fitToPage:true,fitToWidth:1,fitToHeight:0};w.headerFooter={oddFooter:'&L&8Altruist BPM · Confidential&C&8Page &P of &N&R&8&D'}});
+/* register */
+const NRM=MODE!=='rfp';const H0=NRM?['#','Type','Client Name','Process','Location','BD Person','Stage #','Current Status','Win Probability','Monthly Revenue (₹)','Weighted (₹)','Next Action Date','Days Left','FTE Count','Consultant (Y/N)','Solution','Status','Rate (₹ per FTE)','Remarks']:['#','Type','Client / Issuing Org','Bid / Ref No','Category','BD Person','Stage #','Stage','Probability','Value (₹)','Weighted (₹)','Closing Date','Days Left','Fit Score','Fit Rating','Source Portal','Status','Next Action','Notes'];
+const INCH=NRM?[]:['Current Vendor','Vendor Location','Current Rate (₹)','Current Scope of Work','Current FTE / Headcount','Current Agent Salary (₹)','Current Support Salary (₹)','Rate Expected by Client (₹)','Current Contract End'];
+const H=H0.concat([NRM?'Linked RFP':'Bid Decision']).concat(INCH).concat(S.customCols.map(c=>c.label));
+const W=NRM?[5,13,34,24,16,14,8,30,12,20,20,14,10,10,14,28,10,16,44]:[5,13,36,20,18,14,8,30,12,20,20,14,10,10,11,26,10,30,44];
+W.push(18);if(!NRM)W.push(26,18,16,40,14,18,18,18,16);S.customCols.forEach(()=>W.push(18));
+banner(reg,NRM?'COMMERCIALS REGISTER':'PIPELINE REGISTER',sub,H.length);heads(reg,4,1,H,true);W.forEach((w,i)=>reg.getColumn(i+1).width=w);
+const first=5,n=list.length,last=Math.max(5,4+n);
+list.forEach((r,i)=>{const rr=first+i,p=probOf(r)/100,v=cr(val(r)),st=status(r),d=daysLeft(r),g=GF[grp(+r.stage)],z=i%2?'FFF7FAFE':C.white;const row=reg.getRow(rr);
+const wf={formula:`IF(OR(Q${rr}="Won",Q${rr}="Lost"),0,J${rr}*I${rr})`,result:(st==='Won'||st==='Lost')?0:(v||0)*p},df={formula:`IF(OR(L${rr}="",Q${rr}="Won",Q${rr}="Lost"),"",L${rr}-TODAY())`,result:d==null?'':d};
+const vals=NRM?[i+1,r.type,r.client,r.process,r.location,r.owner,+r.stage,stOf(r)[1],p,{formula:`IF(AND(ISNUMBER(R${rr}),ISNUMBER(N${rr})),R${rr}*N${rr},"")`,result:v==null?'':v},wf,isoD(dueOf(r)),df,r.fte==null?null:+r.fte,r.consultant,r.solution,st,r.rate==null?null:+r.rate,r.notes]:[i+1,r.type,r.client,r.refNo,r.category,r.owner,+r.stage,stOf(r)[1],p,v,wf,isoD(dueOf(r)),df,r.fit==null?null:+r.fit,fitRate(r.fit),r.portal,st,r.nextAction,r.notes];
+vals.push(NRM?((r.rfpId&&S.rfp.find(x=>x.id===r.rfpId))?(S.rfp.find(x=>x.id===r.rfpId).refNo||'Linked'):''):r.decision);if(!NRM)vals.push(r.vendor||null,r.vendorLoc||null,r.curRate,r.curScope||null,r.curFte,r.agentSal,r.supportSal,r.expRate,r.incEnd?isoD(r.incEnd):null);S.customCols.forEach(c=>{let v=(r.custom||{})[c.key];if(v===''||v===undefined)v=null;if(v!=null&&c.fmt==='date')v=isoD(v);vals.push(v)});
+vals.forEach((x,j)=>{const c=row.getCell(j+1);c.value=x;cellS(c,{fill:z,wrap:(NRM?[2,3,4,7,15,18]:[2,4,7,15,17,18]).includes(j),h:[0,6,8,11,12,13,14,16].includes(j)?'center':undefined,nf:j===8?'0%':(j===9||j===10)?INR:j===11?'dd-mmm-yyyy':(NRM&&j===17)?INR:undefined})});
+S.customCols.forEach((c,ci)=>{const cell=row.getCell(21+INCH.length+ci);cell.numFmt=c.fmt==='currency'?INR:c.fmt==='percent'?'0.0"%"':c.fmt==='date'?'dd-mmm-yyyy':c.fmt==='number'?'#,##0.##':'General';if(['number','currency','percent','date'].includes(c.fmt))cell.alignment={vertical:'top',horizontal:'right'}});
+if(!NRM){[23,26,27,28].forEach(i=>{row.getCell(i).numFmt=INR;row.getCell(i).alignment={vertical:'top',horizontal:'right'}});row.getCell(29).numFmt='dd-mmm-yyyy';row.getCell(24).alignment={vertical:'top',wrapText:true}}
+const sc=row.getCell(8);sc.fill=fl(g[0]);sc.font=fnt({bold:true,color:{argb:g[1]}});
+if(d!=null&&d<=7)row.getCell(13).font=fnt({bold:true,color:{argb:'FFB91C1C'}});
+row.height=Math.max(18,Math.ceil(Math.max((r.client||'').length/36,(r.notes||'').length/44,(r.nextAction||'').length/30))*14)});
+const tr=last+2;reg.getCell(tr,3).value='TOTAL';reg.getCell(tr,10).value={formula:`SUM(J${first}:J${last})`,result:list.reduce((a,r)=>a+(cr(val(r))||0),0)};reg.getCell(tr,11).value={formula:`SUM(K${first}:K${last})`,result:list.reduce((a,r)=>a+(status(r)==='Won'||status(r)==='Lost'?0:(cr(val(r))||0)*probOf(r)/100),0)};
+for(let c=1;c<=H.length;c++){const x=reg.getCell(tr,c);x.font=fnt({bold:true,color:{argb:C.white}});x.fill=fl(C.navy);if(c===10||c===11)x.numFmt=INR}
+reg.autoFilter={from:{row:4,column:1},to:{row:last,column:H.length}};reg.views=[{state:'frozen',xSplit:3,ySplit:4,showGridLines:false}];
+const R=c=>`'Pipeline Register'!$${c}$${first}:$${c}$${last}`;
+/* summary */
+const s=stats(list);[2,3,4,5,6,7,8,9].forEach((c,i)=>sum.getColumn(c).width=i===0?36:22);sum.getColumn(1).width=2;
+banner(sum,MODE==='rfp'?'ALTRUIST BPM  ·  RFP PIPELINE REPORT':'ALTRUIST BPM  ·  COMMERCIALS REPORT',sub,9);
+section(sum,4,'KEY INDICATORS',2,9);
+const soon=list.filter(r=>{const d=daysLeft(r);return d!=null&&d>=0&&d<=30}).length;
+const K=[['Total records',{formula:`COUNTA(${R('B')})`,result:s.n},'0'],['Open pipeline (₹)',{formula:`SUMIF(${R('Q')},"Open",${R('J')})+SUMIF(${R('Q')},"Stalled",${R('J')})`,result:s.pipe},INR],['Weighted pipeline (₹)',{formula:`SUM(${R('K')})`,result:s.wtd},INR],['Won value (₹)',{formula:`SUMIF(${R('Q')},"Won",${R('J')})`,result:s.wonVal},INR],['Win rate (won ÷ won + lost)',{formula:`IFERROR(COUNTIF(${R('Q')},"Won")/(COUNTIF(${R('Q')},"Won")+COUNTIF(${R('Q')},"Lost")),0)`,result:s.wr||0},'0%'],['Deadlines in 30 days',{formula:`COUNTIFS(${R('M')},">=0",${R('M')},"<=30")`,result:soon},'0']];
+K.forEach((k,i)=>{const a=sum.getCell(5,2+i),b=sum.getCell(6,2+i);a.value=k[0];a.font=fnt({size:8.5,bold:true,color:{argb:C.mute}});a.fill=fl(C.pale);a.alignment={wrapText:true,vertical:'middle',indent:1};a.border={top:{style:'medium',color:{argb:C.blue}}};b.value=k[1];b.numFmt=k[2];b.font=fnt({size:14,bold:true,color:{argb:C.navy}});b.fill=fl(C.pale);b.alignment={horizontal:'left',vertical:'middle',indent:1}});
+sum.getRow(5).height=26;sum.getRow(6).height=34;
+section(sum,8,'PIPELINE BY STAGE',2,9);heads(sum,9,2,['Stage','Win prob.','Records','Value (₹)','Weighted (₹)','Share of records'],false);
+STAGES.forEach((st,i)=>{const rr=10+i,l=list.filter(r=>r.stage==st[0]),v=l.reduce((a,r)=>a+(cr(val(r))||0),0),w=l.reduce((a,r)=>a+(status(r)==='Won'||status(r)==='Lost'?0:(cr(val(r))||0)*probOf(r)/100),0),g=GF[grp(st[0])];
+const x=[`${st[0]} · ${st[1]}`,st[2]/100,{formula:`COUNTIF(${R('G')},${st[0]})`,result:l.length},{formula:`SUMIF(${R('G')},${st[0]},${R('J')})`,result:v},{formula:`SUMIF(${R('G')},${st[0]},${R('K')})`,result:w},{formula:`IFERROR(D${rr}/SUM($D$10:$D$25),0)`,result:s.n?l.length/s.n:0}];
+x.forEach((val,j)=>{const c=sum.getCell(rr,2+j);c.value=val;cellS(c,{h:j?'center':undefined,nf:j===1||j===5?'0%':j>=3?INR:'0',fill:j===0?g[0]:undefined,font:j===0?{bold:true,color:{argb:g[1]}}:undefined})})});
+['B','C','D','E','F','G'].forEach((cl,j)=>{const c=sum.getCell(26,2+j);c.value=j===0?'TOTAL':j===1?null:{formula:`SUM(${cl}10:${cl}25)`};c.font=fnt({bold:true,color:{argb:C.white}});c.fill=fl(C.navy);c.numFmt=j===5?'0%':j>=3?INR:'0';c.alignment={horizontal:j?'center':'left'}});
+section(sum,28,'PERFORMANCE BY RECORD TYPE',2,9);heads(sum,29,2,['Type','Records','Open','Won','Lost','Win rate','Pipeline (₹)','Weighted (₹)'],false);
+TYPES.forEach((t,i)=>{const rr=30+i,q=stats(list.filter(r=>r.type===t));const x=[t,{formula:`COUNTIF(${R('B')},B${rr})`,result:q.n},{formula:`COUNTIFS(${R('B')},B${rr},${R('Q')},"Open")+COUNTIFS(${R('B')},B${rr},${R('Q')},"Stalled")`,result:q.open},{formula:`COUNTIFS(${R('B')},B${rr},${R('Q')},"Won")`,result:q.won},{formula:`COUNTIFS(${R('B')},B${rr},${R('Q')},"Lost")`,result:q.lost},{formula:`IFERROR(E${rr}/(E${rr}+F${rr}),0)`,result:q.wr||0},{formula:`SUMIFS(${R('J')},${R('B')},B${rr},${R('Q')},"Open")+SUMIFS(${R('J')},${R('B')},B${rr},${R('Q')},"Stalled")`,result:q.pipe},{formula:`SUMIFS(${R('K')},${R('B')},B${rr})`,result:q.wtd}];
+x.forEach((val,j)=>{const c=sum.getCell(rr,2+j);c.value=val;cellS(c,{h:j?'center':undefined,nf:j===5?'0%':j>=6?INR:'0',font:j===0?{bold:true}:undefined})})});
+section(sum,34,'UPCOMING DEADLINES · NEXT 60 DAYS',2,9);heads(sum,35,2,['Client / Issuing Org','Type','BD person','Closing','Days left','Value (₹)','Stage','Probability'],false);
+const dl=deadlines(list,60);let rr=36;
+if(!dl.length){sum.mergeCells(rr,2,rr,9);const c=sum.getCell(rr,2);c.value='No open deadlines in the next 60 days.';cellS(c);rr++}
+dl.forEach(r=>{[r.client,r.type,r.owner,isoD(dueOf(r)),daysLeft(r),cr(val(r)),stOf(r)[1],probOf(r)/100].forEach((val,j)=>{const c=sum.getCell(rr,2+j);c.value=val;cellS(c,{wrap:j===0||j===6,h:j?'center':undefined,nf:j===3?'dd-mmm-yyyy':j===5?INR:j===7?'0%':undefined});if(j===4&&val<=7)c.font=fnt({bold:true,color:{argb:'FFB91C1C'}})});sum.getRow(rr).height=Math.max(18,Math.ceil((r.client||'').length/36)*14);rr++});
+rr+=1;section(sum,rr,'BASIS OF PREPARATION',2,9);rr++;
+['Probability: RFPs and BD prospects use the stage probability (see Stage Reference). Farming records carry a manually entered probability. Won = 100%, Lost = 0%.','Weighted pipeline = open or stalled value × probability. Won and lost records are excluded.','Win rate = records won ÷ (won + lost). Open and stalled records are not counted.',(MODE==='rfp'?'Values are tender values in Indian Rupees (₹).':'Values are monthly revenue (rate × FTE) in Indian Rupees (₹).')+' Formulas in this workbook recalculate from the register sheet.'].forEach(t=>{sum.mergeCells(rr,2,rr,9);const c=sum.getCell(rr,2);c.value=t;c.font=fnt({size:9,color:{argb:C.mute}});c.alignment={wrapText:true,vertical:'top'};sum.getRow(rr).height=26;rr++});
+/* team */
+const owners=who?[who]:S.people.concat(list.some(r=>r.owner==='Unassigned')?['Unassigned']:[]);
+banner(tm,'TEAM PERFORMANCE',sub,10);const TH=['BD person','Records','Open','Won','Lost','Win rate','Pipeline (₹)','Weighted (₹)','Won value (₹)','Avg open deal (₹)'];heads(tm,4,1,TH,true);[24,11,11,11,11,12,16,16,16,18].forEach((w,i)=>tm.getColumn(i+1).width=w);
+owners.forEach((o,i)=>{const r=5+i,q=stats(list.filter(x=>x.owner===o));const F=c=>`'Pipeline Register'!$F$${first}:$F$${last}`;
+const x=[o,{formula:`COUNTIF(${R('F')},A${r})`,result:q.n},{formula:`COUNTIFS(${R('F')},A${r},${R('Q')},"Open")+COUNTIFS(${R('F')},A${r},${R('Q')},"Stalled")`,result:q.open},{formula:`COUNTIFS(${R('F')},A${r},${R('Q')},"Won")`,result:q.won},{formula:`COUNTIFS(${R('F')},A${r},${R('Q')},"Lost")`,result:q.lost},{formula:`IFERROR(D${r}/(D${r}+E${r}),0)`,result:q.wr||0},{formula:`SUMIFS(${R('J')},${R('F')},A${r},${R('Q')},"Open")+SUMIFS(${R('J')},${R('F')},A${r},${R('Q')},"Stalled")`,result:q.pipe},{formula:`SUMIFS(${R('K')},${R('F')},A${r})`,result:q.wtd},{formula:`SUMIFS(${R('J')},${R('F')},A${r},${R('Q')},"Won")`,result:q.wonVal},{formula:`IFERROR(G${r}/C${r},0)`,result:q.open?q.pipe/q.open:0}];
+x.forEach((val,j)=>{const c=tm.getCell(r,1+j);c.value=val;cellS(c,{h:j?'center':undefined,nf:j===5?'0%':j>=6?INR:'0',font:j===0?{bold:true}:undefined})})});
+const te=5+owners.length;tm.getCell(te,1).value='TOTAL';for(let j=2;j<=10;j++){const cl=String.fromCharCode(64+j),c=tm.getCell(te,j);c.value=j===6?{formula:`IFERROR(D${te}/(D${te}+E${te}),0)`}:j===10?{formula:`IFERROR(G${te}/C${te},0)`}:{formula:`SUM(${cl}5:${cl}${te-1})`};c.numFmt=j===6?'0%':j>=7?INR:'0';c.alignment={horizontal:'center'}}
+for(let j=1;j<=10;j++){const c=tm.getCell(te,j);c.font=fnt({bold:true,color:{argb:C.white}});c.fill=fl(C.navy)}
+tm.views=[{state:'frozen',ySplit:4,showGridLines:false}];
+/* rfp details */
+banner(rf,'RFP DETAILS',sub,2);rf.getColumn(1).width=30;rf.getColumn(2).width=120;let q=4;
+const put=(a,b,link)=>{const x=rf.getCell(q,1),y=rf.getCell(q,2);x.value=a;cellS(x,{font:{bold:true,color:{argb:C.navy}},fill:C.pale,wrap:true});y.value=link&&b?{text:b,hyperlink:b}:b||'—';cellS(y,{wrap:true,font:link&&b?{color:{argb:'FF0B6FA8'},underline:true}:undefined});rf.getRow(q).height=Math.max(18,Math.ceil(String(b||'').length/115)*14+4);q++};
+const rfps=list.filter(r=>r.type==='RFP');if(!rfps.length){rf.getCell(4,1).value='No RFP records in scope.'}
+rfps.forEach(r=>{rf.mergeCells(q,1,q,2);const b=rf.getCell(q,1);b.value=`${r.client}  ·  ${r.refNo||'No ref no'}`;b.font=fnt({bold:true,size:12,color:{argb:C.white}});b.fill=fl(C.navy);b.alignment={indent:1,vertical:'middle'};rf.getRow(q).height=26;q++;
+put('Issuing organisation',r.client);put('Source portal',r.portal);put('Source type',r.sourceType);put('Bid / Ref no',r.refNo);put('Published',dstr(r.published));put('Closing',(dstr(r.closing)+(r.closingTime?' at '+r.closingTime:''))+(daysLeft(r)!=null?`  (${daysLeft(r)} days left)`:''));put('Category',r.category);put('Tender value',fmt(r.value));put('Fit score',r.fit==null?'':`${r.fit} · ${fitRate(r.fit)}`);put('Why it fits us',r.fitReason);put('Matched keywords',r.keywords);put('Scope',r.scope);put('Link',r.link,1);put('RFP document',r.rfpDoc,1);put('RFP document note',r.rfpDocNote);put('First seen',r.firstSeen);put('Stage',`${stOf(r)[0]} · ${stOf(r)[1]} (${probOf(r)}%)`);put('BD person',r.owner);
+rf.mergeCells(q,1,q,2);const s2=rf.getCell(q,1);s2.value='RFP REQUIREMENTS';s2.font=fnt({bold:true,color:{argb:C.white}});s2.fill=fl(C.blue);s2.alignment={indent:1};q++;
+REQ.forEach(x=>put(x[1],(r.req||{})[x[0]]));q+=2});
+/* stage ref */
+banner(sr,'STAGE REFERENCE',sub,4);heads(sr,4,1,['#','Stage','Win probability','Key milestone'],false);[6,40,16,56].forEach((w,i)=>sr.getColumn(i+1).width=w);
+STAGES.forEach((st,i)=>{const g=GF[grp(st[0])];st.slice(0,4).forEach((val,j)=>{const c=sr.getCell(5+i,1+j);c.value=j===2?val/100:val;cellS(c,{h:j===1||j===3?undefined:'center',nf:j===2?'0%':undefined,fill:j===1?g[0]:undefined,font:j===1?{bold:true,color:{argb:g[1]}}:undefined})})});
+const nt=5+STAGES.length+1;sr.mergeCells(nt,1,nt,4);sr.getCell(nt,1).value='Farming records use a manually entered probability that is independent of stage.';sr.getCell(nt,1).font=fnt({italic:true,color:{argb:C.mute}});
+if(MODE!=='rfp')wb.removeWorksheet(rf.id);
+return wb}
+async function exportReport(list,who){try{toast('Preparing report…');const wb=await buildReport(list,who);const buf=await wb.xlsx.writeBuffer();const d=new Date().toISOString().slice(0,10);await save(`${who?'Performance_'+who.replace(/\W+/g,'_'):(MODE==='rfp'?'RFP_Pipeline_Report':'Commercials_Report')}_${d}.xlsx`,buf)}catch(e){console.error(e);toast('Could not build the report')}}
+function exportCSV(){if(MODE!=='rfp'){const cs=['Client Name','Process','Location','Solution','Rate (₹)','FTE Count','Monthly Revenue (₹)','Consultant (Y/N)','Win Probability %','BD Person','Remarks','Current Status','Type','Next Action','Next Action Date'];const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';const rows=S.records.map(r=>[r.client,r.process,r.location,r.solution,r.rate==null?'':r.rate,r.fte==null?'':r.fte,val(r)==null?'':val(r),r.consultant,probOf(r),r.owner,r.notes,stOf(r)[1],r.type,r.nextAction,r.nextDate]);save('Commercials_Tracker.csv','\ufeff'+[cs].concat(rows).map(r=>r.map(q).join(',')).join('\r\n'));return}const cs=['Type','Client / Issuing Org','Bid / Ref No','Category','BD Person','Stage #','Stage','Probability %','Value (₹)','Closing Date','Fit Score','Source Portal','Source Type','Published','Scope','Link','Next Action','Notes','Current Vendor','Vendor Location','Current Rate (₹)','Current Scope of Work','Current FTE / Headcount','Current Agent Salary (₹)','Current Support Salary (₹)','Rate Expected by Client (₹)','Current Contract End'];
+const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';const rows=S.records.map(r=>[r.type,r.client,r.refNo,r.category,r.owner,r.stage,stOf(r)[1],probOf(r),r.value==null?'':r.value,r.closing,r.fit==null?'':r.fit,r.portal,r.sourceType,r.published,r.scope,r.link,r.nextAction,r.notes]);
+save('Pipeline_Register.csv','﻿'+[cs].concat(rows).map(r=>r.map(q).join(',')).join('\r\n'))}
+/* ---------- bulk upload ---------- */
+const TH2F=()=>MODE!=='rfp'?['Client Name','Process','Location','Solution','Rate (₹)','FTE Count','Consultant (Y/N)','Win Probability %','BD Person','Remarks','Current Status','Type','Next Action','Next Action Date']:['Type','Client / Issuing Org','Bid / Ref No','Category','BD Person','Value (₹)','Closing Date','Stage','Probability %','Fit Score','Source Portal','Source Type','Published','Scope','Link','Next Action','Notes'];
+async function downloadTemplate(){const TH2=TH2F();const wb=new ExcelJS.Workbook(),ws=wb.addWorksheet('Upload Template'),ins=wb.addWorksheet('Instructions'),sg=wb.addWorksheet('Stages');
+ws.addRow(TH2).eachCell(c=>{c.font=fnt({bold:true,color:{argb:C.white}});c.fill=fl(C.navy);c.border=bx;c.alignment={wrapText:true,vertical:'middle'}});ws.getRow(1).height=30;TH2.forEach((h,i)=>ws.getColumn(i+1).width=MODE!=='rfp'?(i===0?30:i===9?36:18):(i===1?36:i>=13?36:18));
+if(MODE!=='rfp'){ws.addRow(['Example Retail Co','Customer Support','Mumbai','Voice + Chat','60000','10','N','','Sushant','Sample row, delete before upload','9','BD Prospect','Share revised proposal','2026-12-05']);ws.addRow(['Example Existing Client','Back Office','Pune','Data Entry','35000','20','Y','55','Karishma','Farming uses the manual win probability','8','Farming','Review pricing','2026-12-10'])}else{ws.addRow(['RFP','Example Department of Telecom','EX/2026/001','Contact Centre','Sushant','250000000','2026-12-31','5','','80','Example e-Proc','Central','2026-11-20','Statewide helpline','https://example.com/tender','Review RFP','Sample row, delete before upload']);}
+ws.views=[{state:'frozen',ySplit:1}];
+[['Bulk upload instructions'],['1. Keep the header row exactly as in the Upload Template sheet. Extra columns are ignored.'],['2. Type: RFP, BD Prospect or Farming.'],['3. Value: an amount in rupees, e.g. 1500000.'],['4. Stage: the number 1–16 or the stage name. See the Stages sheet.'],['5. Probability %: used only for Farming. RFP and BD Prospect rows take their probability from the stage.'],['6. Dates: YYYY-MM-DD, DD-MM-YYYY or DD-Mon-YYYY.'],['7. A row whose Bid / Ref No (or client name for the same type) already exists updates that record. Other rows are added.'],['8. A report exported from this tracker (Pipeline Register sheet) can be uploaded again.']].forEach((r,i)=>{ins.addRow(r);if(!i)ins.getCell(1,1).font=fnt({bold:true,size:13})});ins.getColumn(1).width=120;
+sg.addRow(['Stage #','Stage','Win probability']).font=fnt({bold:true});STAGES.forEach(s=>sg.addRow([s[0],s[1],s[2]/100]).getCell(3).numFmt='0%');sg.getColumn(2).width=40;sg.getColumn(3).width=16;
+await save('Bulk_Upload_Template.xlsx',await wb.xlsx.writeBuffer())}
+const ALI={vendor:['current vendor','vendor','incumbent'],vendorLoc:['vendor location','location of vendor'],curRate:['current rate (₹)','current rate'],curScope:['current scope of work','current scope'],curFte:['current fte / headcount','current fte','current headcount'],agentSal:['current agent salary (₹)','current agent salary'],supportSal:['current support salary (₹)','current support salary'],expRate:['rate expected by client (₹)','rate expected by client','expected rate'],incEnd:['current contract end','contract end'],process:['process'],location:['location'],solution:['solution'],rate:['rate (₹)','rate','rate (₹ per fte)'],fte:['fte count','fte'],consultant:['consultant (y/n)','consultant'],nextDate:['next action date'],type:['type','record type'],client:['client name','client / issuing org','client','issuing organisation','issuing organization','prospect','organisation'],refNo:['bid / ref no','bid/ref no','ref no','bid no','reference'],category:['category'],owner:['bd person','owner','bd owner'],value:['value (₹)','value (₹ cr)','value','tender value','value (inr)'],closing:['closing date','closing'],stage:['stage #','stage no','current status','stage'],prob:['probability %','win probability %','probability','win probability'],fit:['fit score','fit'],portal:['source portal','source'],sourceType:['source type'],published:['published','published date'],scope:['scope'],link:['link','tender link'],nextAction:['next action'],notes:['notes','remarks'],fitReason:['why it fits us','why it fits'],keywords:['matched keywords','keywords']};
+const nz=x=>String(x==null?'':x).toLowerCase().replace(/\s+/g,' ').trim();
+function toISO(v){if(v==null||v==='')return'';if(v instanceof Date&&!isNaN(v)){const d=new Date(v.getTime()+12*36e5);return d.toISOString().slice(0,10)}
+const s=String(v).trim();let m=s.match(/^(\d{4})-(\d{2})-(\d{2})/);if(m)return m[0];m=s.match(/^(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})/);if(m)return`${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;const d=new Date(s+' 12:00');return isNaN(d)?'':d.toISOString().slice(0,10)}
+function parseSheet(wbk){const names=wbk.SheetNames,nm=names.find(n=>/upload template|pipeline register/i.test(n))||names[0];const rows=XLSX.utils.sheet_to_json(wbk.Sheets[nm],{header:1,raw:true,defval:'',cellDates:true});
+let hi=rows.findIndex((r,i)=>i<15&&r.some(c=>ALI.client.includes(nz(c))));if(hi<0)return{err:'Could not find a header row with a Client column. Use the bulk-upload template.'};
+const hd=rows[hi].map(nz),col={};Object.keys(ALI).forEach(k=>{for(const a of ALI[k]){const i=hd.indexOf(a);if(i>=0){col[k]=i;break}}});
+const crHdr=col.value!=null&&/cr/.test(hd[col.value]);const out=[],skipped=[];
+rows.slice(hi+1).forEach((r,i)=>{const g=k=>col[k]==null?'':r[col[k]];const client=String(g('client')).trim();if(!client){if(r.some(c=>String(c).trim()))skipped.push(hi+i+2);return}
+if(/^total$/i.test(client))return;const o=blank();o.client=client;const t=nz(g('type'));o.type=MODE==='rfp'||/rfp|tender/.test(t)?'RFP':/farm/.test(t)?'Farming':'BD Prospect';['process','location','solution'].forEach(k=>o[k]=String(g(k)).trim());{const rv=g('rate');o.rate=typeof rv==='number'?rv:(()=>{const m=parseMoney(rv);return Number.isNaN(m)?null:m})();const fv2=g('fte');o.fte=fv2===''||isNaN(+fv2)?null:+fv2;const cy=nz(g('consultant'));o.consultant=/^y/.test(cy)?'Y':/^n/.test(cy)?'N':'';o.nextDate=toISO(g('nextDate'))}
+['refNo','category','portal','sourceType','scope','link','nextAction','notes','fitReason','keywords'].forEach(k=>o[k]=String(g(k)).trim());
+o.owner=String(g('owner')).trim()||'Unassigned';
+let v=g('value');if(typeof v==='number')o.value=crHdr?v*1e7:v;else{const m=parseMoney(v);o.value=Number.isNaN(m)?null:m}
+const sv=g('stage');let st=typeof sv==='number'?sv:parseInt(sv);if(!(st>=1&&st<=16)){const f=STAGES.find(s=>nz(s[1])===nz(sv)||(nz(sv)&&nz(s[1]).includes(nz(sv))));st=f?f[0]:1}o.stage=st;
+const pv=g('prob');if(pv!==''&&!isNaN(+pv)){o.prob=(typeof pv==='number'&&pv>0&&pv<=1&&!/%/.test(hd[col.prob]))?Math.round(pv*100):+pv}
+const fv=g('fit');o.fit=fv===''||isNaN(+fv)?null:+fv;if(MODE==='rfp'){['vendor','vendorLoc','curScope'].forEach(k=>o[k]=String(g(k)).trim());['curRate','agentSal','supportSal','expRate'].forEach(k=>{const x=g(k);if(typeof x==='number')o[k]=x;else{const m=parseMoney(x);o[k]=Number.isNaN(m)?null:m}});const cf=g('curFte');o.curFte=cf===''||isNaN(+cf)?null:+cf;o.incEnd=toISO(g('incEnd'))}o.closing=toISO(g('closing'));o.published=toISO(g('published'));out.push(o)});
+return{rows:out,skipped}}
+let pending=null;
+function bulkModal(){modal(`<h3>Bulk upload</h3><p>Upload an Excel or CSV file to add or update records. Rows matching an existing Bid / Ref No update that record.</p><div class="drop" id="drop" tabindex="0" role="button">${ic('up')} Drop a file here or click to choose (.xlsx, .xls, .csv)</div><input type="file" id="fileIn" accept=".xlsx,.xls,.csv" hidden><div id="up"></div><div class="mf"><button class="btn" data-act="tpl">${ic('dn')} Download template</button><button class="btn" data-act="cancel">Close</button></div>`);
+const d=$('#drop'),fi=$('#fileIn');d.onclick=()=>fi.click();d.onkeydown=e=>{if(e.key==='Enter')fi.click()};d.ondragover=e=>{e.preventDefault();d.classList.add('hot')};d.ondragleave=()=>d.classList.remove('hot');d.ondrop=e=>{e.preventDefault();d.classList.remove('hot');if(e.dataTransfer.files[0])handleFile(e.dataTransfer.files[0])}}
+async function handleFile(f){if(MODE==='ai')return handleAIFile(f);const box=$('#up');try{const buf=await f.arrayBuffer();const wbk=XLSX.read(buf,{type:'array',cellDates:true});const p=parseSheet(wbk);if(p.err){box.innerHTML=`<p class="d-red">${p.err}</p>`;return}
+const match=o=>S.records.find(r=>r.type===o.type&&((o.refNo&&r.refNo&&r.refNo.toLowerCase()===o.refNo.toLowerCase())||(!o.refNo&&r.client.toLowerCase()===o.client.toLowerCase()&&(MODE==='rfp'||(r.process||'').toLowerCase()===(o.process||'').toLowerCase()))));
+const upd=p.rows.filter(match).length,newP=[...new Set(p.rows.map(r=>r.owner).filter(o=>o!=='Unassigned'&&!S.people.some(x=>x.toLowerCase()===o.toLowerCase())))];pending={rows:p.rows,match,newP};
+box.innerHTML=`<p style="margin-top:12px"><b>${p.rows.length}</b> rows ready: <b>${p.rows.length-upd}</b> new, <b>${upd}</b> updates${p.skipped.length?`, ${p.skipped.length} skipped (no client name)`:''}.${newP.length?` New BD people to add: ${esc(newP.join(', '))}.`:''}</p><table class="mini"><thead><tr><th>Client</th><th>Type</th><th>Owner</th><th class="r">Value</th><th>Stage</th></tr></thead><tbody>${p.rows.slice(0,6).map(r=>`<tr><td>${esc(r.client)}</td><td>${r.type}</td><td>${esc(r.owner)}</td><td class="r">${fmt(r.value)||'–'}</td><td>${r.stage}</td></tr>`).join('')}</tbody></table>${p.rows.length>6?`<p>…and ${p.rows.length-6} more.</p>`:''}<div class="mf"><button class="btn pri" data-act="doimport">Import ${p.rows.length} rows</button></div>`}catch(e){console.error(e);box.innerHTML='<p class="d-red">That file could not be read. Check it is a valid .xlsx or .csv.</p>'}}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-act="doimport"]');if(!b||!pending)return;if(pending.ai){importAI();return}let add=0,up=0;
+pending.newP.forEach(n=>S.people.push(n));if(pending.newP.length)metaDirty=true;
+pending.rows.forEach(o=>{const m=pending.match(o);if(m){const keep={id:m.id,ts:m.ts,req:m.req,custom:m.custom,closingTime:m.closingTime,firstSeen:m.firstSeen,rfpDoc:m.rfpDoc,rfpDocNote:m.rfpDocNote,nextDate:m.nextDate};Object.keys(o).forEach(k=>{if(['id','ts','req','custom'].includes(k))return;if(o[k]!==''&&o[k]!=null&&!(k==='owner'&&o[k]==='Unassigned'&&m.owner))m[k]=o[k]});touch(m.id);up++}else{o.ts=Date.now()+add;S.records.push(o);touch(o.id);add++}});
+pending=null;L().innerHTML='';render();toast(`Imported: ${add} added, ${up} updated`)});
+
+/* ---------- AI solutions: export and import ---------- */
+const AIH0=['Client Name','Process Owner','IT SPOC','Solutions Offered','Status','Estimated Monthly Revenue (₹)','Remarks'];const AIHF=()=>AIH0.concat(S.customCols.map(c=>c.label));
+const AIG={Launched:'late',Won:'won',Warm:'stall',Cold:'early',Lost:'lost'};
+async function exportAI(){try{toast('Preparing report…');const list=S.ai,n=list.length;const wb=new ExcelJS.Workbook();wb.creator='Altruist BPM';wb.created=new Date();
+const sum=wb.addWorksheet('Summary',{views:[{showGridLines:false}],properties:{tabColor:{argb:C.navy}}}),reg=wb.addWorksheet('AI Solutions Register',{properties:{tabColor:{argb:C.blue}}});
+const when=new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'}),sub=`Prepared ${when}  ·  Revenue is estimated monthly revenue in Indian Rupees (₹)  ·  Confidential`;
+[sum,reg].forEach(w=>{w.pageSetup={orientation:'landscape',paperSize:9,fitToPage:true,fitToWidth:1,fitToHeight:0};w.headerFooter={oddFooter:'&L&8Altruist BPM · Confidential&C&8Page &P of &N&R&8&D'}});
+const H=['#','Client Name','Process Owner','IT SPOC','Solutions Offered','Status','Est. Monthly Revenue (₹)','Annualised (₹)','Remarks'].concat(S.customCols.map(c=>c.label));
+banner(reg,'AI SOLUTIONS REGISTER',sub,H.length);heads(reg,4,1,H,true);[5,32,22,22,42,13,20,18,44].concat(S.customCols.map(()=>18)).forEach((w,i)=>reg.getColumn(i+1).width=w);
+const f=5,l=Math.max(5,4+n);
+list.forEach((r,i)=>{const rr=f+i,row=reg.getRow(rr),z=i%2?'FFF7FAFE':C.white,g=GF[AIG[r.status]||'early'];
+[i+1,r.client,r.processOwner,r.itSpoc,r.solutions,r.status,r.rev==null?null:+r.rev,{formula:`IF(ISNUMBER(G${rr}),G${rr}*12,"")`,result:r.rev==null?'':(+r.rev)*12},r.remarks].concat(S.customCols.map(c=>{let v=(r.custom||{})[c.key];if(v===''||v===undefined)v=null;if(v!=null&&c.fmt==='date')v=isoD(v);return v})).forEach((v,j)=>{const c=row.getCell(j+1);c.value=v;if(j>=9){const cc=S.customCols[j-9];c.numFmt=cc.fmt==='currency'?INR:cc.fmt==='percent'?'0.0"%"':cc.fmt==='date'?'dd-mmm-yyyy':cc.fmt==='number'?'#,##0.##':'General';if(['number','currency','percent','date'].includes(cc.fmt))c.alignment={vertical:'top',horizontal:'right'}}cellS(c,{fill:z,wrap:[1,2,3,4,8].includes(j),h:j===0||j===5?'center':undefined,nf:(j===6||j===7)?INR:undefined})});
+const sc=row.getCell(6);sc.fill=fl(g[0]);sc.font=fnt({bold:true,color:{argb:g[1]}});sc.dataValidation={type:'list',allowBlank:true,formulae:['"Launched,Won,Warm,Cold,Lost"']};
+row.height=Math.max(18,Math.ceil(Math.max((r.solutions||'').length/42,(r.remarks||'').length/44,(r.client||'').length/32))*14)});
+const tr=l+2;reg.getCell(tr,2).value='TOTAL';[7,8].forEach(c=>{const L2=String.fromCharCode(64+c);reg.getCell(tr,c).value={formula:`SUM(${L2}${f}:${L2}${l})`,result:list.reduce((a,r)=>a+(+r.rev||0)*(c===8?12:1),0)};reg.getCell(tr,c).numFmt=INR});
+for(let c=1;c<=H.length;c++){const x=reg.getCell(tr,c);x.font=fnt({bold:true,color:{argb:C.white}});x.fill=fl(C.navy)}
+reg.autoFilter={from:{row:4,column:1},to:{row:l,column:H.length}};reg.views=[{state:'frozen',xSplit:2,ySplit:4,showGridLines:false}];
+const R=c=>`'AI Solutions Register'!$${c}$${f}:$${c}$${l}`;
+[2,3,4,5,6,7,8].forEach((c,i)=>sum.getColumn(c).width=i===0?30:22);sum.getColumn(1).width=2;
+banner(sum,'ALTRUIST BPM  ·  AI SOLUTIONS TRACKER',sub,8);section(sum,4,'KEY INDICATORS',2,8);
+const cnt=s=>list.filter(r=>r.status===s).length,rv=s=>list.filter(r=>r.status===s).reduce((a,r)=>a+(+r.rev||0),0),d=cnt('Launched')+cnt('Won')+cnt('Lost');
+const K=[['Clients',{formula:`COUNTA(${R('B')})`,result:n},'0'],['Launched revenue (₹ / month)',{formula:`SUMIF(${R('F')},"Launched",${R('G')})`,result:rv('Launched')},INR],['Won revenue (₹ / month)',{formula:`SUMIF(${R('F')},"Won",${R('G')})`,result:rv('Won')},INR],['Warm pipeline (₹ / month)',{formula:`SUMIF(${R('F')},"Warm",${R('G')})`,result:rv('Warm')},INR],['Conversion',{formula:`IFERROR((COUNTIF(${R('F')},"Launched")+COUNTIF(${R('F')},"Won"))/(COUNTIF(${R('F')},"Launched")+COUNTIF(${R('F')},"Won")+COUNTIF(${R('F')},"Lost")),0)`,result:d?(cnt('Launched')+cnt('Won'))/d:0},'0%']];
+K.forEach((k,i)=>{const a=sum.getCell(5,2+i),b=sum.getCell(6,2+i);a.value=k[0];a.font=fnt({size:8.5,bold:true,color:{argb:C.mute}});a.fill=fl(C.pale);a.alignment={wrapText:true,vertical:'middle',indent:1};a.border={top:{style:'medium',color:{argb:C.blue}}};b.value=k[1];b.numFmt=k[2];b.font=fnt({size:14,bold:true,color:{argb:C.navy}});b.fill=fl(C.pale);b.alignment={horizontal:'left',vertical:'middle',indent:1}});
+sum.getRow(5).height=26;sum.getRow(6).height=34;
+section(sum,8,'POSITION BY STATUS',2,8);heads(sum,9,2,['Status','Clients','Est. monthly revenue (₹)','Annualised (₹)','Share of clients','Share of revenue'],true);
+AIST.forEach((s,i)=>{const rr=10+i,g=GF[AIG[s]];[s,{formula:`COUNTIF(${R('F')},B${rr})`,result:cnt(s)},{formula:`SUMIF(${R('F')},B${rr},${R('G')})`,result:rv(s)},{formula:`D${rr}*12`,result:rv(s)*12},{formula:`IFERROR(C${rr}/SUM($C$10:$C$14),0)`,result:n?cnt(s)/n:0},{formula:`IFERROR(D${rr}/SUM($D$10:$D$14),0)`,result:list.reduce((a,r)=>a+(+r.rev||0),0)?rv(s)/list.reduce((a,r)=>a+(+r.rev||0),0):0}].forEach((v,j)=>{const c=sum.getCell(rr,2+j);c.value=v;cellS(c,{h:j?'center':undefined,nf:j===1?'0':j<=3?INR:'0%',fill:j===0?g[0]:undefined,font:j===0?{bold:true,color:{argb:g[1]}}:undefined})})});
+['B','C','D','E','F','G'].forEach((cl,j)=>{const c=sum.getCell(15,2+j);c.value=j===0?'TOTAL':{formula:`SUM(${cl}10:${cl}14)`};c.font=fnt({bold:true,color:{argb:C.white}});c.fill=fl(C.navy);c.numFmt=j===0?'General':j>=4?'0%':j===1?'0':INR;c.alignment={horizontal:j?'center':'left'}});
+section(sum,17,'BASIS OF PREPARATION',2,8);['Status definitions: Launched = live with the client. Won = contract won, not yet live. Warm = active discussion. Cold = no current traction. Lost = not proceeding.','Conversion = (Launched + Won) ÷ (Launched + Won + Lost). Warm and Cold rows are not counted.','Annualised revenue = estimated monthly revenue × 12. Formulas recalculate from the AI Solutions Register sheet.'].forEach((t,i)=>{sum.mergeCells(18+i,2,18+i,8);const c=sum.getCell(18+i,2);c.value=t;c.font=fnt({size:9,color:{argb:C.mute}});c.alignment={wrapText:true,vertical:'top'};sum.getRow(18+i).height=26});
+await save(`AI_Solutions_Report_${new Date().toISOString().slice(0,10)}.xlsx`,await wb.xlsx.writeBuffer())}catch(e){console.error(e);toast('Could not build the report')}}
+function exportAICSV(){const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';save('AI_Solutions.csv','﻿'+[AIHF()].concat(S.ai.map(r=>[r.client,r.processOwner,r.itSpoc,r.solutions,r.status,r.rev==null?'':r.rev,r.remarks].concat(S.customCols.map(c=>(r.custom||{})[c.key])))).map(r=>r.map(q).join(',')).join('\r\n'))}
+async function aiTemplate(){const wb=new ExcelJS.Workbook(),ws=wb.addWorksheet('Upload Template'),ins=wb.addWorksheet('Instructions');
+ws.addRow(AIHF()).eachCell(c=>{c.font=fnt({bold:true,color:{argb:C.white}});c.fill=fl(C.navy);c.border=bx;c.alignment={wrapText:true,vertical:'middle'}});ws.getRow(1).height=30;[30,22,22,42,14,28,44].forEach((w,i)=>ws.getColumn(i+1).width=w);
+ws.addRow(['Example Client','Example Process Owner','Example IT SPOC','Voice bot for collections','Warm','250000','Sample row, delete before upload']);
+for(let r=2;r<=500;r++)ws.getCell(r,5).dataValidation={type:'list',allowBlank:true,formulae:['"Launched,Won,Warm,Cold,Lost"']};ws.views=[{state:'frozen',ySplit:1}];
+['Bulk upload instructions','1. Keep the header row as in the Upload Template sheet.','2. Status must be one of Launched, Won, Warm, Cold or Lost.','3. Estimated Monthly Revenue: an amount in rupees, e.g. 250000.','4. A row whose Client Name and Solutions Offered already exist updates that row. Other rows are added.','5. A report exported from this tracker (AI Solutions Register sheet) can be uploaded again.'].forEach((t,i)=>{ins.addRow([t]);if(!i)ins.getCell(1,1).font=fnt({bold:true,size:13})});ins.getColumn(1).width=110;
+await save('AI_Solutions_Upload_Template.xlsx',await wb.xlsx.writeBuffer())}
+const AIAL={client:['client name','client'],processOwner:['process owner'],itSpoc:['it spoc','spoc','it contact'],solutions:['solutions offered','solutions','solution'],status:['status'],rev:['estimated monthly revenue (₹)','estimated monthly revenue','est. monthly revenue (₹)','est. monthly revenue','monthly revenue','revenue'],remarks:['remarks','notes']};
+function parseAI(wbk){const nm=wbk.SheetNames.find(n=>/ai solutions register|upload template/i.test(n))||wbk.SheetNames[0];const rows=XLSX.utils.sheet_to_json(wbk.Sheets[nm],{header:1,raw:true,defval:''});
+const hi=rows.findIndex((r,i)=>i<15&&r.some(c=>AIAL.client.includes(nz(c))));if(hi<0)return{err:'Could not find a header row with a Client Name column. Use the bulk-upload template.'};
+const hd=rows[hi].map(nz),col={};Object.keys(AIAL).forEach(k=>{for(const a of AIAL[k]){const i=hd.indexOf(a);if(i>=0){col[k]=i;break}}});const out=[],skipped=[];
+rows.slice(hi+1).forEach((r,i)=>{const g=k=>col[k]==null?'':r[col[k]];const client=String(g('client')).trim();if(!client){if(r.some(c=>String(c).trim()))skipped.push(hi+i+2);return}if(/^total$/i.test(client))return;
+const o=blankA();o.client=client;o.custom={};S.customCols.forEach(c=>{const i=hd.indexOf(nz(c.label));if(i<0)return;let v=r[i];if(v===''||v==null)return;if(c.fmt==='currency'){if(typeof v!=='number'){const m=parseMoney(v);v=Number.isNaN(m)?null:m}}else if(c.fmt==='number'||c.fmt==='percent'){v=isNaN(+v)?null:+v}else if(c.fmt==='date'){v=toISO(v)}else v=String(v).trim();if(v!=null&&v!=='')o.custom[c.key]=v});['processOwner','itSpoc','solutions','remarks'].forEach(k=>o[k]=String(g(k)).trim());const st=nz(g('status'));o.status=AIST.find(s=>nz(s)===st)||AIST.find(s=>st&&nz(s).startsWith(st))||'Warm';
+const v=g('rev');if(typeof v==='number')o.rev=v;else{const m=parseMoney(v);o.rev=Number.isNaN(m)?null:m}out.push(o)});return{rows:out,skipped}}
+async function handleAIFile(f){const box=$('#up');try{const wbk=XLSX.read(await f.arrayBuffer(),{type:'array'});const p=parseAI(wbk);if(p.err){box.innerHTML=`<p class="d-red">${p.err}</p>`;return}
+const key=o=>(o.client+'|'+o.solutions).toLowerCase(),match=o=>S.ai.find(r=>key(r)===key(o));const upd=p.rows.filter(match).length;pending={ai:true,rows:p.rows,match};
+box.innerHTML=`<p style="margin-top:12px"><b>${p.rows.length}</b> rows ready: <b>${p.rows.length-upd}</b> new, <b>${upd}</b> updates${p.skipped.length?`, ${p.skipped.length} skipped (no client name)`:''}.</p><table class="mini"><thead><tr><th>Client</th><th>Solution</th><th>Status</th><th class="r">Monthly revenue</th></tr></thead><tbody>${p.rows.slice(0,6).map(r=>`<tr><td>${esc(r.client)}</td><td>${esc(r.solutions)}</td><td>${r.status}</td><td class="r">${fmt(r.rev)||'–'}</td></tr>`).join('')}</tbody></table>${p.rows.length>6?`<p>…and ${p.rows.length-6} more.</p>`:''}<div class="mf"><button class="btn pri" data-act="doimport">Import ${p.rows.length} rows</button></div>`}catch(e){console.error(e);box.innerHTML='<p class="d-red">That file could not be read. Check it is a valid .xlsx or .csv.</p>'}}
+function importAI(){let add=0,up=0;pending.rows.forEach(o=>{const m=pending.match(o);if(m){['processOwner','itSpoc','remarks'].forEach(k=>{if(o[k])m[k]=o[k]});m.status=o.status;if(o.rev!=null)m.rev=o.rev;if(o.custom&&Object.keys(o.custom).length)m.custom=Object.assign(m.custom||{},o.custom);touch(m.id);up++}else{o.ts=Date.now()+add;S.ai.push(o);touch(o.id);add++}});pending=null;L().innerHTML='';render();toast(`Imported: ${add} added, ${up} updated`)}
+route();render();initData();
+})();
+</script></body></html>

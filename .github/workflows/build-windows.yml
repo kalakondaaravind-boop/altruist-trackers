@@ -1,0 +1,48 @@
+name: Build Windows app
+
+on:
+  push:
+    tags: ['v*']          # tag v1.0.1 -> builds the installer and publishes a GitHub Release
+  workflow_dispatch:      # manual run: builds the installer and attaches it to the run (no release)
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Check tag matches package.json version
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        run: |
+          V="v$(node -p "require('./package.json').version")"
+          if [ "$V" != "${GITHUB_REF_NAME}" ]; then echo "Tag ${GITHUB_REF_NAME} does not match package.json version $V"; exit 1; fi
+
+      - run: npm ci
+      - run: npm test
+      - run: npm run build:renderer
+
+      - name: Build and publish release
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: npx electron-builder --win --publish always
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build installer (no release)
+        if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+        run: npx electron-builder --win --publish never
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Altruist-Trackers-Windows
+          path: |
+            dist/*.exe
+            dist/latest.yml
