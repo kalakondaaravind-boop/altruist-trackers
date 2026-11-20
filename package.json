@@ -1,7 +1,7 @@
 {
   "name": "altruist-trackers",
   "productName": "Altruist Trackers",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "RFP, Commercials and AI Solutions trackers for Altruist BPM. All data stays on this computer.",
   "author": "Altruist Technologies Private Limited",
   "main": "main.js",
