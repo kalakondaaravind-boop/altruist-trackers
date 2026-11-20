@@ -21,7 +21,7 @@ function saveWinState() {
   if (!win || win.isDestroyed()) return;
   try {
     const b = win.getNormalBounds();
-    fs.writeFileSync(path.join(app.getPath('userData'), 'window.json'), JSON.stringify({ ...b, max: win.isMaximized() }));
+    fs.writeFileSync(path.join(app.getPath('userData'), 'window.json'), JSON.stringify({ ...b, max: win.isMaximized(), zoom: zoomF }));
   } catch (e) {}
 }
 function createWindow() {
@@ -32,6 +32,8 @@ function createWindow() {
     webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false, sandbox: true, devTools: !app.isPackaged }
   });
   if (s.max) win.maximize();
+  zoomF = s.zoom || 1;
+  win.webContents.on('did-finish-load', () => applyZoom(zoomF, false));
   win.once('ready-to-show', () => win.show());
   win.loadFile(path.join(__dirname, 'src', 'index.html'));
   win.webContents.setWindowOpenHandler(({ url }) => { if (/^https?:/i.test(url)) shell.openExternal(url); return { action: 'deny' }; });
@@ -54,6 +56,30 @@ async function flushRenderer() {
       new Promise(r => setTimeout(r, 4000))
     ]);
   } catch (e) {}
+}
+
+/* ---------- zoom (saved between sessions) ---------- */
+const ZMIN = 0.4, ZMAX = 2.0;
+let zoomF = 1;
+function applyZoom(f, persist = true) {
+  zoomF = Math.max(ZMIN, Math.min(ZMAX, Math.round(f * 100) / 100));
+  if (win && !win.isDestroyed()) {
+    win.webContents.setZoomFactor(zoomF);
+    win.webContents.executeJavaScript('window.__zshow&&window.__zshow(' + zoomF + ')').catch(() => {});
+  }
+  if (persist) saveWinState();
+  return zoomF;
+}
+function fitZoom() { if (win) win.webContents.executeJavaScript('window.__fitZoom&&window.__fitZoom()').catch(() => {}); }
+
+/* ---------- PDF of the current view ---------- */
+async function exportPDF() {
+  const r = await dialog.showSaveDialog(win, { title: 'Export current view as PDF', defaultPath: path.join(app.getPath('documents'), `Altruist-Trackers-${today()}.pdf`), filters: [{ name: 'PDF', extensions: ['pdf'] }] });
+  if (r.canceled || !r.filePath) return { canceled: true };
+  const buf = await win.webContents.printToPDF({ landscape: true, printBackground: true, pageSize: 'A4', margins: { marginType: 'custom', top: 0.4, bottom: 0.4, left: 0.4, right: 0.4 } });
+  fs.writeFileSync(r.filePath, buf);
+  shell.showItemInFolder(r.filePath);
+  return { ok: true, path: r.filePath };
 }
 
 /* ---------- backups ---------- */
@@ -102,6 +128,10 @@ ipcMain.handle('file:save', async (e, name, data) => {
   fs.writeFileSync(r.filePath, typeof data === 'string' ? Buffer.from(data, 'utf8') : Buffer.from(data));
   return { ok: true, path: r.filePath };
 });
+ipcMain.handle('zoom:get', () => zoomF);
+ipcMain.handle('zoom:set', (e, z) => applyZoom(+z));
+ipcMain.handle('zoom:by', (e, d) => applyZoom(zoomF + (+d)));
+ipcMain.handle('file:pdf', exportPDF);
 ipcMain.handle('backup:export', exportBackup);
 ipcMain.handle('backup:import', importBackup);
 ipcMain.handle('backup:safety', (e, label) => { store.flushSync(); return store.snapshot(String(label || 'manual').replace(/[^a-z0-9-]/gi, ''), V()); });
@@ -139,10 +169,19 @@ function buildMenu() {
     { label: '&File', submenu: [
       { label: 'Export backup…', accelerator: 'CmdOrCtrl+Shift+E', click: () => exportBackup() },
       { label: 'Import backup…', accelerator: 'CmdOrCtrl+Shift+I', click: () => importBackup() },
+      { label: 'Export current view as PDF…', accelerator: 'CmdOrCtrl+P', click: () => exportPDF() },
       { type: 'separator' },
       { label: 'Open backup folder', click: () => shell.openPath(store.backupDir) },
       { type: 'separator' }, { role: 'quit', label: 'Exit' } ] },
-    { label: '&View', submenu: [{ role: 'reload', label: 'Reload' }, { type: 'separator' }, { role: 'resetZoom' }, { role: 'zoomIn' }, { role: 'zoomOut' }, { type: 'separator' }, { role: 'togglefullscreen' }] },
+    { label: '&View', submenu: [
+      { label: 'Zoom in', accelerator: 'CmdOrCtrl+=', click: () => applyZoom(zoomF + 0.1) },
+      { label: 'Zoom in (numpad)', accelerator: 'CmdOrCtrl+numadd', visible: false, click: () => applyZoom(zoomF + 0.1) },
+      { label: 'Zoom in (plus)', accelerator: 'CmdOrCtrl+Plus', visible: false, click: () => applyZoom(zoomF + 0.1) },
+      { label: 'Zoom out', accelerator: 'CmdOrCtrl+-', click: () => applyZoom(zoomF - 0.1) },
+      { label: 'Zoom out (numpad)', accelerator: 'CmdOrCtrl+numsub', visible: false, click: () => applyZoom(zoomF - 0.1) },
+      { label: 'Actual size (100%)', accelerator: 'CmdOrCtrl+0', click: () => applyZoom(1) },
+      { label: 'Fit table to window', accelerator: 'CmdOrCtrl+9', click: () => fitZoom() },
+      { type: 'separator' }, { role: 'togglefullscreen', label: 'Full screen' }, { role: 'reload', label: 'Reload' }] },
     { label: '&Help', submenu: [
       { label: 'Check for updates…', click: () => checkUpdates(true) },
       { label: 'About Altruist Trackers', click: () => dialog.showMessageBox(win, { type: 'info', title: 'About', message: 'Altruist Trackers', detail: `Version ${V()}\nAltruist Technologies Private Limited\n\nAll data is stored on this computer only:\n${app.getPath('userData')}` }) } ] }

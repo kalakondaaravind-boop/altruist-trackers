@@ -12,5 +12,9 @@ contextBridge.exposeInMainWorld('desk', {
   safetyBackup: label => inv('backup:safety', label),
   openBackupFolder: () => inv('backup:open'),
   checkUpdates: () => inv('app:update'),
-  info: () => inv('app:info')
+  info: () => inv('app:info'),
+  getZoom: () => inv('zoom:get'),
+  setZoom: z => inv('zoom:set', z),
+  zoomBy: d => inv('zoom:by', d),
+  exportPDF: () => inv('file:pdf')
 });

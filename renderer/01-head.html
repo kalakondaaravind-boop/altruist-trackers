@@ -21,7 +21,7 @@ svg.i{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke
 .sg{margin-top:14px}.sh{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#8fb3de}.sh.on{color:#fff}.sh em{font-style:normal;background:rgba(255,255,255,.12);border-radius:10px;padding:1px 8px;font-size:10px;color:#fff}
 .si{display:flex;align-items:center;gap:6px;width:100%;text-align:left;background:none;border:0;color:#cfe0f5;font:inherit;font-size:13px;padding:8px 10px;border-radius:8px;cursor:pointer}.si:hover{background:rgba(255,255,255,.08);color:#fff}.si.on{background:#0b86c4;color:#fff;font-weight:600}.si.sub{padding:6px 10px 6px 26px;font-size:12.5px}.si.add{color:#8fb3de}
 #main{margin-top:14px}
-.content{flex:1;min-width:0;max-width:1500px;padding:18px 22px 40px}
+.content{flex:1;min-width:0;max-width:none;padding:18px 22px 40px}
 @media(max-width:900px){.shell{flex-direction:column}.side{position:static;width:100%;flex:none;height:auto}}
 .top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
 h1{margin:0;font-size:22px;font-weight:800;letter-spacing:.2px;color:var(--navy);text-transform:uppercase}
@@ -129,6 +129,56 @@ table.mini tr.lk{cursor:pointer}
 .mods{margin-bottom:6px}.mods .mod{height:42px;padding:0 24px;font-size:12px;letter-spacing:.6px}
 .sv{font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;color:var(--mute)}
 @media(prefers-reduced-motion:no-preference){.drawer{animation:sl .18s ease-out}@keyframes sl{from{transform:translateX(30px);opacity:.6}}}
+
+/* ===== Executive theme ===== */
+body{background:#f1f5fb}
+h1{font-size:25px;font-weight:700;letter-spacing:-.3px;text-transform:none}
+.sub{font-size:13px;letter-spacing:0;text-transform:none;color:#5f7090;font-weight:400;margin-top:4px}
+.top{align-items:center}
+.btn{font-size:12.5px;font-weight:600;letter-spacing:0;text-transform:none;height:36px;border-radius:8px;box-shadow:0 1px 2px rgba(13,33,69,.05);transition:background .12s,border-color .12s}
+.btn:hover{border-color:#aebfd9;background:#f7faff}
+.btn.pri{font-size:13px;height:38px;box-shadow:0 2px 6px rgba(11,134,196,.28)}.btn.pri:hover{background:#0975ac}
+.chip{font-size:12px;font-weight:600;letter-spacing:0;text-transform:none;height:30px}
+.kpi{border-radius:14px;box-shadow:0 1px 3px rgba(13,33,69,.06);border-color:#e0e8f3;padding:16px 18px 14px 24px}
+.kpi:before{left:11px;top:16px;bottom:16px}
+.kl{font-size:11.5px;font-weight:600;letter-spacing:.2px;text-transform:none;color:#5f7090}
+.kv{font-size:24px;font-weight:700;margin-top:5px;letter-spacing:-.3px}
+.ks{font-size:11.5px;letter-spacing:0;text-transform:none;color:#8191ad;margin-top:3px}
+.panel,.tcard{border-radius:14px;box-shadow:0 1px 3px rgba(13,33,69,.06);border-color:#e0e8f3}
+.panel{padding:18px 20px}
+.panel h3{font-size:14.5px;font-weight:700;letter-spacing:0;text-transform:none;margin-bottom:14px}
+.tcard{min-height:300px;display:flex;flex-direction:column}.tscroll{flex:none}.tfoot{margin-top:auto}
+.tscroll{max-height:none}
+th{font-size:11px;font-weight:600;letter-spacing:.3px;height:42px}
+td{height:36px}
+.cell{font-size:12.5px}
+td.cl .cell{text-transform:none;font-weight:600;font-size:12.5px;letter-spacing:0}
+.cv{font-size:12.5px;line-height:35px}
+.pillsel,.pill{text-transform:none;font-size:11px;letter-spacing:0;font-weight:600}
+tbody tr:nth-child(even) td{background:#fafcfe}
+tbody tr:hover td{background:#f1f7ff}
+.tfoot{font-size:12px;padding:12px 18px}
+.search{border-radius:9px;height:38px;box-shadow:0 1px 2px rgba(13,33,69,.04)}.search input{font-size:13px}
+.side{background:linear-gradient(180deg,#0d2145 0,#0a1a38 100%);box-shadow:2px 0 10px rgba(13,33,69,.12)}
+.sh{font-size:10.5px;letter-spacing:.12em}
+.si{font-size:13.5px;padding:9px 12px;border-radius:9px}
+.si svg{width:16px;height:16px;flex:none;opacity:.85}
+.si.sub{font-size:13px}
+.sfoot .si{font-size:12.5px;padding:7px 12px;color:#a9c0e0}.sfoot .si.rst{color:#ffb4b4}
+.content{padding:22px 28px 56px}
+.drawer{box-shadow:-10px 0 40px rgba(13,33,69,.2)}
+.zoombar{position:fixed;right:18px;bottom:16px;z-index:60;display:flex;align-items:center;gap:2px;background:#fff;border:1px solid #d5e0ef;border-radius:999px;padding:3px 6px;box-shadow:0 4px 16px rgba(13,33,69,.14);font-size:12px;color:#0d2145}
+.zoombar button{border:0;background:none;height:26px;min-width:26px;border-radius:13px;cursor:pointer;font:inherit;font-weight:600;color:#0d2145;padding:0 8px}
+.zoombar button:hover{background:#eaf2fb}.zoombar .zp{min-width:44px;text-align:center;font-variant-numeric:tabular-nums;color:#41567a}
+.zoombar .zf{border-left:1px solid #e3ebf6;border-radius:0 13px 13px 0;margin-left:3px;color:#0b86c4}
+@media print{
+ @page{size:A4 landscape;margin:10mm}
+ body{background:#fff}.side,.acts,.zoombar,.bar .search,#layer,.sfoot{display:none!important}
+ .shell{display:block}.content{padding:0}.tscroll{overflow:visible;max-height:none}
+ .tcard,.panel,.kpi{box-shadow:none;break-inside:avoid}
+ th{position:static}.s0,.s1,.s2{position:static}
+ *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
 </style>
 </head>
 <body>

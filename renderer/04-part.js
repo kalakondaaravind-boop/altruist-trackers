@@ -89,6 +89,10 @@ switch(a){
 case'tab':U.view=v;location.hash=MODE+'-'+v;render();break;
 case'nav':{const m=b.dataset.m;if(m!==MODE){L().innerHTML='';U.open=null;setMode(m)}U.view=v;location.hash=m+'-'+v;render();break}
 case'unlink':{const me=rec(id);if(!me)break;const isR=S.rfp.includes(me),o=isR?S.comm.find(x=>x.id===me.commId):S.rfp.find(x=>x.id===me.rfpId);if(isR)me.commId='';else me.rfpId='';if(o){if(isR)o.rfpId='';else o.commId=''}touch(me.id);o&&touch(o.id);toast('Unlinked');refreshAfterLink();break}
+case'zin':desk.zoomBy(.1).then(zshow);break;
+case'zout':desk.zoomBy(-.1).then(zshow);break;
+case'zfit':window.__fitZoom();break;
+case'pdf':{$('#exm')&&($('#exm').hidden=true);const r=await desk.exportPDF();if(r&&r.ok)toast('PDF saved');break}
 case'bkexport':if(window.desk){const r=await desk.exportBackup();if(r&&r.ok)toast('Backup exported')}break;
 case'bkimport':if(window.desk)await desk.importBackup();break;
 case'bkfolder':if(window.desk)desk.openBackupFolder();break;
@@ -126,3 +130,19 @@ case'bulk':bulkModal();break;
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){if($('.drawer'))closeLayer();else if(L().innerHTML)L().innerHTML=''}});
 function route(){const hh=location.hash.slice(1),m=hh.split('-')[0];let h=hh;if(m==='rfp'||m==='comm'||m==='ai'){if(m!==MODE)setMode(m);h=hh.slice(m.length+1)}if(['pipeline','overview','team'].includes(h))U.view=h;else if(h.startsWith('person-')){const k=h.slice(7);const p=ownersAll().find(n=>n.replace(/[^a-zA-Z0-9]/g,'')===k);if(p){U.view='person';U.person=p}}}
 window.addEventListener('hashchange',()=>{route();render()});
+
+/* ---------- zoom: Ctrl + wheel, Ctrl +/-/0, fit to window ---------- */
+function zshow(z){const e=document.getElementById('zp');if(e&&z)e.textContent=Math.round(z*100)+'%'}
+window.__zshow=zshow;
+document.addEventListener('wheel',e=>{if(!(e.ctrlKey||e.metaKey)||!window.desk)return;e.preventDefault();desk.zoomBy(e.deltaY<0?.1:-.1).then(zshow)},{passive:false});
+window.__fitZoom=async function(){if(!window.desk)return;
+  let z=await desk.getZoom();
+  for(let i=0;i<5;i++){
+    const sc=document.querySelector('.tscroll'),tb=sc&&sc.querySelector('table');
+    if(!sc||!tb){await desk.setZoom(1);break}
+    const need=tb.scrollWidth,have=sc.clientWidth;if(!need||!have)break;
+    const ratio=have/need;if(Math.abs(1-ratio)<.015)break;
+    z=Math.max(.45,Math.min(1.6,z*ratio*(ratio<1?.99:1)));
+    await desk.setZoom(z);await new Promise(r=>setTimeout(r,60));
+  }
+  zshow(await desk.getZoom())};
